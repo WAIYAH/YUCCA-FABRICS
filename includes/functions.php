@@ -214,6 +214,101 @@ function fabric_image(string $file): string
     return url('assets/images/fabrics/' . rawurlencode(basename($file)));
 }
 
+function service_image(string $file): string
+{
+    return url('assets/images/services/' . rawurlencode(basename($file)));
+}
+
+/** Look, icon and longer copy for a service slug (see includes/service-details.php), merged over the defaults. */
+function service_details(string $slug): array
+{
+    static $details;
+    $details ??= require __DIR__ . '/service-details.php';
+    return ($details[$slug] ?? []) + $details['default'];
+}
+
+// Service categories booked through the consultation form rather than the project request form.
+const CONSULTATION_CATEGORY_SLUGS = ['fabric-sourcing', 'interior-styling'];
+const CONSULTATION_TYPES = ['Residential interior design', 'Commercial design', 'Living room styling', 'Bedroom styling', 'Office design', 'Fabric and colour selection'];
+
+function is_consultation_service(array $service): bool
+{
+    return in_array($service['category_slug'] ?? '', CONSULTATION_CATEGORY_SLUGS, true);
+}
+
+/** Services with their category name and slug, for the services and consultations pages. */
+function active_services(bool $consultationsOnly = false): array
+{
+    $services = db()->query('SELECT s.*, c.name AS category_name, c.slug AS category_slug FROM services s LEFT JOIN service_categories c ON c.id=s.category_id WHERE s.is_active=1 ORDER BY s.id')->fetchAll();
+    return $consultationsOnly ? array_values(array_filter($services, 'is_consultation_service')) : $services;
+}
+
+/** Whole-number price for chips and headlines, e.g. "KES 2,500". */
+function money_whole(float|int|string $amount): string
+{
+    return CURRENCY . ' ' . number_format((float) $amount);
+}
+
+/** Decorative yucca-leaf sprig echoing the logo; purely ornamental, so hidden from assistive tech. */
+function yucca_sprig_svg(string $class = ''): string
+{
+    $leaves = ['M100 195Q70 120 25 60Q85 115 100 195Z', 'M100 195Q80 110 55 25Q95 105 100 195Z', 'M100 195Q88 100 92 8Q108 100 100 195Z', 'M100 195Q120 110 148 28Q106 105 100 195Z', 'M100 195Q130 120 178 62Q118 118 100 195Z', 'M100 195Q60 160 8 140Q70 150 100 195Z', 'M100 195Q140 158 194 140Q130 150 100 195Z'];
+    $paths = implode('', array_map(fn(string $d): string => '<path d="' . $d . '"/>', $leaves));
+    return '<svg class="' . e($class) . '" viewBox="0 0 200 200" fill="currentColor" aria-hidden="true" focusable="false">' . $paths . '</svg>';
+}
+
+function journal_image(?string $image): string
+{
+    return $image ? url('uploads/blog/' . rawurlencode(basename($image))) : fabric_image('soho-inverted-leather.jpeg');
+}
+
+function read_minutes(string $body): int
+{
+    return max(1, (int) ceil(str_word_count(strip_tags($body)) / 200));
+}
+
+/**
+ * Journal article text to HTML. Everything is escaped first, then a tiny, safe subset of Markdown is applied:
+ * blank lines separate paragraphs, "## " starts a heading and "- " starts a bullet. Plain text still works.
+ */
+function journal_body_html(string $body): string
+{
+    $html = '';
+    $paragraph = [];
+    $list = [];
+    $flush = function () use (&$html, &$paragraph, &$list): void {
+        if ($paragraph) $html .= '<p>' . implode('<br>', array_map('e', $paragraph)) . '</p>';
+        if ($list) $html .= '<ul>' . implode('', array_map(fn(string $item): string => '<li>' . e($item) . '</li>', $list)) . '</ul>';
+        $paragraph = $list = [];
+    };
+    // Line by line, so a heading, its paragraph and a list can follow each other without blank lines.
+    foreach (explode("\n", str_replace("\r\n", "\n", trim($body))) as $line) {
+        $line = trim($line);
+        if ($line === '') {
+            $flush();
+        } elseif (str_starts_with($line, '## ')) {
+            $flush();
+            $html .= '<h2>' . e(substr($line, 3)) . '</h2>';
+        } elseif (str_starts_with($line, '- ')) {
+            if ($paragraph) $flush();
+            $list[] = substr($line, 2);
+        } else {
+            if ($list) $flush();
+            $paragraph[] = $line;
+        }
+    }
+    $flush();
+    return $html;
+}
+
+/** Latest published journal posts with their category, optionally excluding one post. */
+function latest_journal_posts(int $limit, int $excludeId = 0): array
+{
+    $stmt = db()->prepare("SELECT bp.*, bc.name AS category_name, bc.slug AS category_slug FROM blog_posts bp LEFT JOIN blog_categories bc ON bc.id=bp.category_id WHERE bp.status='published' AND bp.published_at<=NOW() AND bp.id<>? ORDER BY bp.published_at DESC LIMIT " . max(1, $limit));
+    $stmt->execute([$excludeId]);
+    return $stmt->fetchAll();
+}
+
 function fabric_collection(): array
 {
     static $collection;

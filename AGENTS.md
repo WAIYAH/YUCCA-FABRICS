@@ -46,8 +46,12 @@ consultations; staff manage everything from `/admin`.
    `C:\xampp\php\php.exe database\seed_fabric_products.php`. It copies the photos into `uploads/products/`,
    is safe to re-run and never overwrites products edited in admin. For a new fabric, add the photo and an
    entry in `includes/fabric-collection.php`, then its colour and description to the script's `$details`.
-4. Create an admin: `C:\xampp\php\php.exe database\create_admin.php "Name" email username`.
-5. Serve through XAMPP so `.htaccess` rules apply (sitemap/robots rewrites, denied files).
+4. Publish the starter journal (6 articles with cover photos): `C:\xampp\php\php.exe database\seed_journal_posts.php`.
+   Same rules as the fabric seed: re-runnable, copies images into `uploads/blog/`, never overwrites admin edits.
+   Article text supports a tiny safe Markdown subset via `journal_body_html()`: blank line = paragraph,
+   `## ` = heading, `- ` = bullet. Everything is escaped first, so never output post bodies any other way.
+5. Create an admin: `C:\xampp\php\php.exe database\create_admin.php "Name" email username`.
+6. Serve through XAMPP so `.htaccess` rules apply (sitemap/robots rewrites, denied files).
 
 `php` and `mysql` are not on PATH; use `C:\xampp\php\php.exe` and `C:\xampp\mysql\bin\mysql.exe`.
 
@@ -82,6 +86,11 @@ consultations; staff manage everything from `/admin`.
   automatically. Use `fabric_image('file.jpeg')` to build its URL.
 - Most lookbook cards are portrait collages with a label in the middle. When cropping one to a wide frame,
   show the top band (`object-top` on `<img>`, or `background-position:center top` for backgrounds).
+- Service photos live in `assets/images/services/`; `includes/service-details.php` gives each service (by slug)
+  its colour theme, icon, photo, tagline and longer copy, rendered by `includes/service-card.php`. Services in
+  the `fabric-sourcing` / `interior-styling` categories are booked through the consultation form.
+- External images must be free to use commercially (e.g. the Unsplash License, never Unsplash+). Download them
+  at web size into `assets/images/` and record the photographer and source in that folder's `CREDITS.md`.
 - `PRODUCT_PLACEHOLDER_IMAGE` in `includes/functions.php` is the fallback for products without a photo.
 - Do not put site imagery in `uploads/`; that folder is gitignored and reserved for runtime uploads.
 - Every `<img>` needs meaningful `alt` text; add `loading="lazy"` below the fold.

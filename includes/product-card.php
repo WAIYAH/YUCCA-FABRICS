@@ -1,4 +1,7 @@
-<?php /** Included inside product loops. @var array $product a products row (p.*) */ $productUrl = url('product-details.php?slug=' . rawurlencode($product['slug'])); $onSale = $product['sale_price'] !== null && (float) $product['sale_price'] < (float) $product['price']; ?>
+<?php
+// Included inside product loops with $product set to a products row (p.*).
+/** @var array $product */
+$productUrl = url('product-details.php?slug=' . rawurlencode($product['slug'])); $onSale = $product['sale_price'] !== null && (float) $product['sale_price'] < (float) $product['price']; ?>
 <article class="group flex flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-ink/5 transition motion-safe:hover:-translate-y-1 hover:shadow-lg">
     <a href="<?= e($productUrl) ?>" class="relative block aspect-[4/5] overflow-hidden bg-cream">
         <img src="<?= e(product_image($product['image'] ?? null)) ?>" alt="<?= e($product['name']) ?>" loading="lazy" class="h-full w-full object-cover transition duration-700 motion-safe:group-hover:scale-105">

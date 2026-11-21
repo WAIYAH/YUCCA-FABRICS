@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   const onScroll=()=>{const y=window.scrollY;header?.classList.toggle('is-scrolled',y>8);backToTop?.classList.toggle('is-visible',y>600);};
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
   backToTop?.addEventListener('click',event=>{event.preventDefault();window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('main')?.focus({preventScroll:true});});
+  // Service CTAs pre-select the form option. If the form is on another page the link just navigates there.
+  document.querySelectorAll('[data-fill-select]').forEach(link=>link.addEventListener('click',event=>{
+    const select=document.querySelector(link.dataset.fillSelect);
+    const target=link.hash?document.querySelector(link.hash):null;
+    if(!select||!target)return;
+    event.preventDefault();
+    if(link.dataset.fillValue)select.value=link.dataset.fillValue;
+    target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+    select.focus({preventScroll:true});
+  }));
   if('IntersectionObserver' in window){
     document.documentElement.classList.add('reveal-ready');
     const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}}),{rootMargin:'0px 0px -8% 0px'});
