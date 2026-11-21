@@ -4,7 +4,10 @@ $pageTitle = $pageTitle ?? APP_NAME . ' | A Softer Place to Land';
 $description = $description ?? 'Discover beautiful fabrics, upholstery craftsmanship and thoughtful interior design at Yucca Fabrics.';
 $canonicalPath = parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
 if (BASE_URL !== '' && str_starts_with($canonicalPath, BASE_URL)) $canonicalPath = substr($canonicalPath, strlen(BASE_URL)) ?: '/';
-$currentScript = basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'index.php'));
+// Path relative to the site root (e.g. "account/consultations.php"), so account pages don't light up public menu items.
+$scriptPath = (string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php');
+if (BASE_URL !== '' && str_starts_with($scriptPath, BASE_URL)) $scriptPath = substr($scriptPath, strlen(BASE_URL));
+$currentScript = ltrim($scriptPath, '/');
 $user = current_user();
 $isCustomer = $user && ($user['role'] ?? '') === 'customer';
 $accountUrl = url($user ? (($user['role'] ?? '') === 'admin' ? 'admin/dashboard.php' : 'account/dashboard.php') : 'auth/login.php');
@@ -121,3 +124,4 @@ $isActive = fn(string $script): bool => $script === $currentScript || ($script =
     </div>
 </header>
 <main id="main" tabindex="-1">
+<?php if ($flashNotice = flash('error')): ?><div class="mx-auto max-w-7xl px-5 pt-6"><?= form_alert($flashNotice, 'info') ?></div><?php endif; ?>

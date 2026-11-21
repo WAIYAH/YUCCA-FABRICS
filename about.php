@@ -1,17 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/functions.php';
-$fabricCount = (int) db()->query('SELECT COUNT(*) FROM products WHERE is_active=1')->fetchColumn();
-$materialCount = (int) db()->query("SELECT COUNT(DISTINCT material) FROM products WHERE is_active=1 AND material IS NOT NULL AND material<>''")->fetchColumn();
-$serviceCount = count(active_services());
-// Real counts from the site, plus milestones only when an admin has entered verified figures in settings.
-$numbers = array_filter([
-    'Fabrics in the collection' => $fabricCount ?: '',
-    'Fabric types, from bouclé to velvet' => $materialCount ?: '',
-    'Upholstery and design services' => $serviceCount ?: '',
-    'Years of experience' => setting('years_experience'),
-    'Completed projects' => setting('completed_projects'),
-    'Happy customers' => setting('verified_customers'),
-], fn($value) => $value !== '' && $value !== 0);
+$numbers = site_numbers();
 $offers = [
     ['fa-swatchbook', '#16646E', 'Fabrics', 'A curated collection of bouclé, linen, velvet and leather, chosen to look beautiful and live well.', 'Shop fabrics', 'shop.php', fabric_image('santa-boucle.jpeg'), 'Santa herringbone bouclé on a sofa'],
     ['fa-couch', '#1F5B43', 'Upholstery', 'Reupholstery and cushion renewal that give much-loved furniture another chapter.', 'Upholstery services', 'services.php', service_image('reupholstery-tufted-corduroy.jpg'), 'Green corduroy upholstery with tufted buttons'],

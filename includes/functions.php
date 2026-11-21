@@ -94,9 +94,18 @@ function require_login(): void
 
 function require_admin(): void
 {
-    if (!current_user() || (current_user()['role'] ?? '') !== 'admin') {
+    // Signed-out visitors are sent to sign in; signed-in customers get a branded "no access" page.
+    if (!current_user()) {
+        flash('error', 'Please sign in with an administrator account to continue.');
+        redirect('auth/login.php');
+    }
+    if ((current_user()['role'] ?? '') !== 'admin') {
         http_response_code(403);
-        exit('You do not have permission to access this page.');
+        $pageTitle = 'No access | Yucca Fabrics';
+        require __DIR__ . '/header.php';
+        echo '<section class="mx-auto max-w-2xl px-5 py-24 text-center"><span class="mx-auto grid h-16 w-16 place-items-center rounded-full bg-cream text-2xl text-forest"><i class="fa-solid fa-lock" aria-hidden="true"></i></span><h1 class="mt-6 font-serif text-4xl">This area is for the Yucca team</h1><p class="mt-3 text-sm text-gray-600">Your account doesn’t have access to the administration pages.</p><a class="mt-8 inline-block rounded-full bg-forest px-6 py-3 text-sm font-semibold text-white" href="' . e(url('account/dashboard.php')) . '">Go to my account</a></section>';
+        require __DIR__ . '/footer.php';
+        exit;
     }
 }
 
@@ -199,7 +208,7 @@ function product_price_html(array $product): string
     $price = (float) $product['price'];
     $sale = $product['sale_price'] !== null ? (float) $product['sale_price'] : null;
     if ($sale !== null && $sale < $price) {
-        return '<span class="text-clay">' . e(money($sale)) . '</span> <s class="text-xs font-normal text-gray-400">' . e(money($price)) . '</s>' . $unit;
+        return '<span class="text-clay">' . e(money($sale)) . '</span> <s class="text-xs font-normal text-gray-500">' . e(money($price)) . '</s>' . $unit;
     }
     return e(money($price)) . $unit;
 }
@@ -307,6 +316,75 @@ function latest_journal_posts(int $limit, int $excludeId = 0): array
     $stmt = db()->prepare("SELECT bp.*, bc.name AS category_name, bc.slug AS category_slug FROM blog_posts bp LEFT JOIN blog_categories bc ON bc.id=bp.category_id WHERE bp.status='published' AND bp.published_at<=NOW() AND bp.id<>? ORDER BY bp.published_at DESC LIMIT " . max(1, $limit));
     $stmt->execute([$excludeId]);
     return $stmt->fetchAll();
+}
+
+function payment_method_label(string $method): string
+{
+    return ['cod' => 'Cash on delivery', 'mpesa' => 'M-Pesa', 'bank_transfer' => 'Bank transfer'][$method] ?? ucfirst(str_replace('_', ' ', $method));
+}
+
+/** Coloured pill for order, payment, consultation and request statuses (dark text on a light tint for AA). */
+function status_badge(string $status): string
+{
+    $tones = [
+        'bg-[#FBF0D9] text-[#6B4A07]' => ['pending', 'new', 'unpaid', 'sent'],
+        'bg-[#DDEFF1] text-[#0F4A52]' => ['confirmed', 'processing', 'shipped', 'quoted', 'in_progress', 'approved', 'accepted'],
+        'bg-[#DFF0E7] text-[#17442F]' => ['delivered', 'paid', 'completed', 'replied'],
+        'bg-[#F6E1DE] text-[#7A2E22]' => ['cancelled', 'failed', 'declined', 'rejected', 'expired'],
+    ];
+    $class = 'bg-gray-100 text-gray-700';
+    foreach ($tones as $tone => $statuses) if (in_array($status, $statuses, true)) $class = $tone;
+    return '<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ' . $class . '"><span class="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true"></span>' . e(ucfirst(str_replace('_', ' ', $status))) . '</span>';
+}
+
+/** Success, info or error message box used above forms and for flash messages. */
+function form_alert(string $message, string $type = 'error'): string
+{
+    [$class, $icon, $role] = match ($type) {
+        'success' => ['bg-[#DFF0E7] text-[#17442F]', 'fa-circle-check', 'status'],
+        'info' => ['bg-[#DDEFF1] text-[#0F4A52]', 'fa-circle-info', 'status'],
+        default => ['bg-[#F6E1DE] text-[#7A2E22]', 'fa-circle-exclamation', 'alert'],
+    };
+    return '<p class="flex items-start gap-3 rounded-2xl p-4 text-sm ' . $class . '" role="' . $role . '"><i class="fa-solid ' . $icon . ' mt-0.5" aria-hidden="true"></i><span>' . e($message) . '</span></p>';
+}
+
+/** Password input with a show/hide button (wired up in main.js via data-toggle-password). */
+function password_input_html(string $name, string $id, string $label, string $autocomplete, int $minLength = 0, string $hint = ''): string
+{
+    $hintId = $hint !== '' ? $id . '-hint' : '';
+    return '<div><label class="text-sm font-medium" for="' . e($id) . '">' . e($label) . '</label><div class="relative mt-1">'
+        . '<input class="form-control pr-12" type="password" id="' . e($id) . '" name="' . e($name) . '" required autocomplete="' . e($autocomplete) . '"' . ($minLength ? ' minlength="' . $minLength . '"' : '') . ($hintId ? ' aria-describedby="' . e($hintId) . '"' : '') . '>'
+        . '<button type="button" class="absolute inset-y-0 right-0 grid w-12 place-items-center rounded-r-lg text-gray-500 transition hover:text-forest" data-toggle-password aria-label="Show password" aria-pressed="false"><i class="fa-regular fa-eye" aria-hidden="true"></i></button></div>'
+        . ($hint !== '' ? '<p class="mt-1.5 text-xs text-gray-500" id="' . e($hintId) . '">' . e($hint) . '</p>' : '') . '</div>';
+}
+
+/** Bag → details & payment → confirmation progress bar for the purchase journey (1-based step). */
+function checkout_steps(int $current): string
+{
+    $html = '<ol class="mt-6 flex items-center gap-2 text-xs font-semibold sm:gap-3 sm:text-sm" aria-label="Checkout progress">';
+    foreach (['Bag', 'Details & payment', 'Confirmation'] as $index => $label) {
+        $step = $index + 1;
+        $state = $step < $current ? 'done' : ($step === $current ? 'current' : 'next');
+        if ($index > 0) $html .= '<li class="h-px w-6 bg-ink/20 sm:w-10" aria-hidden="true"></li>';
+        $badge = $state === 'done' ? '<i class="fa-solid fa-check text-[10px]" aria-hidden="true"></i>' : (string) $step;
+        $tone = $state === 'next' ? 'bg-white text-gray-500 ring-1 ring-ink/15' : 'bg-forest text-white';
+        $html .= '<li class="flex items-center gap-2' . ($state === 'next' ? ' text-gray-500' : '') . '"' . ($state === 'current' ? ' aria-current="step"' : '') . '><span class="grid h-7 w-7 place-items-center rounded-full ' . $tone . '">' . $badge . '</span><span class="' . ($state === 'current' ? '' : 'hidden sm:inline') . '">' . e($label) . '</span></li>';
+    }
+    return $html . '</ol>';
+}
+
+/** Real counts from the catalogue, plus milestones only when an admin has entered verified figures in settings. */
+function site_numbers(): array
+{
+    $count = fn(string $sql): int => (int) db()->query($sql)->fetchColumn();
+    return array_filter([
+        'Fabrics in the collection' => $count('SELECT COUNT(*) FROM products WHERE is_active=1') ?: '',
+        'Fabric types, from bouclé to velvet' => $count("SELECT COUNT(DISTINCT material) FROM products WHERE is_active=1 AND material IS NOT NULL AND material<>''") ?: '',
+        'Upholstery and design services' => $count('SELECT COUNT(*) FROM services WHERE is_active=1') ?: '',
+        'Years of experience' => setting('years_experience'),
+        'Completed projects' => setting('completed_projects'),
+        'Happy customers' => setting('verified_customers'),
+    ], fn($value) => $value !== '');
 }
 
 function fabric_collection(): array

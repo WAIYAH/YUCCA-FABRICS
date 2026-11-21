@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   const onScroll=()=>{const y=window.scrollY;header?.classList.toggle('is-scrolled',y>8);backToTop?.classList.toggle('is-visible',y>600);};
   window.addEventListener('scroll',onScroll,{passive:true});onScroll();
   backToTop?.addEventListener('click',event=>{event.preventDefault();window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('main')?.focus({preventScroll:true});});
+  // Bag quantities save as soon as they change; the "Update bag" button remains for no-JS visitors.
+  document.querySelectorAll('form[data-auto-submit]').forEach(form=>form.querySelectorAll('input[type="number"]').forEach(input=>input.addEventListener('change',()=>{if(input.checkValidity())form.requestSubmit(form.querySelector('[data-update-button]'));})));
+  document.querySelectorAll('[data-toggle-password]').forEach(button=>button.addEventListener('click',()=>{
+    const input=button.parentElement.querySelector('input');
+    const show=input.type==='password';
+    input.type=show?'text':'password';
+    button.setAttribute('aria-pressed',String(show));
+    button.setAttribute('aria-label',show?'Hide password':'Show password');
+    button.querySelector('i')?.classList.replace(show?'fa-eye':'fa-eye-slash',show?'fa-eye-slash':'fa-eye');
+  }));
   // Service CTAs pre-select the form option. If the form is on another page the link just navigates there.
   document.querySelectorAll('[data-fill-select]').forEach(link=>link.addEventListener('click',event=>{
     const select=document.querySelector(link.dataset.fillSelect);

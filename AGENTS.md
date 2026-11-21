@@ -72,6 +72,17 @@ consultations; staff manage everything from `/admin`.
   and rendered for both desktop and mobile; add pages there, not in two places.
 - Component classes (`nav-link`, `icon-button`, `mobile-link`, `footer-list`, `back-to-top`, `form-control`,
   `eyebrow`) are defined in `assets/css/style.css`.
+- Shared page shells: account pages set `$accountActive`, `$accountTitle` (optional `$accountIntro`,
+  `$accountAction`) and wrap content in `includes/account-start.php` / `account-end.php`; sign-in pages use
+  `includes/auth-start.php` / `auth-end.php`; legal pages use `includes/legal-page.php`.
+- UI helpers in `includes/functions.php`: `status_badge()` for any order/payment/booking status,
+  `payment_method_label()`, `form_alert($message, 'error'|'success'|'info')`, `password_input_html()` (with
+  show/hide toggle), `checkout_steps()` for the bag → checkout → confirmation bar, and `site_numbers()` for
+  honest statistics (live counts plus only admin-verified milestones; never hard-code figures).
+- `flash('error', …)` messages are shown automatically at the top of the next page by `includes/header.php`.
+- Errors: `config/config.php` logs uncaught exceptions and shows visitors a generic page (or JSON for API calls).
+  Never echo `$exception->getMessage()` from a `PDOException` to users; catch it before `RuntimeException`
+  (it is a subclass) and show a friendly message. Set `APP_DEBUG=true` in `.env` only on your own machine.
 - Social links come from `social_links()` in `includes/functions.php` (Instagram, Facebook, TikTok, WhatsApp).
   Blank settings fall back to each platform's home page as a placeholder; use `whatsapp_url()` for any
   WhatsApp link so the admin URL, or the business phone in international format, is used everywhere.

@@ -2,9 +2,9 @@
 :root {
   --forest: #3f5320;
   --olive: #5b7029;
-  --sage: #647536;
+  --sage: #576829;
   --clay: #8c5530;
-  --wheat: #d8b07e;
+  --wheat: #e4c59a;
   --sand: #f7f4ee;
   --cream: #efeadf;
   --ink: #2a2b25;
@@ -81,6 +81,10 @@ footer :focus-visible, .bg-forest :focus-visible, .bg-night :focus-visible { out
 .journal-body ul { display: grid; gap: .6rem; padding: 1.25rem 1.5rem; border-left: 3px solid var(--wheat); border-radius: 0 1rem 1rem 0; background: var(--cream); }
 .journal-body li { position: relative; padding-left: 1.5rem; }
 .journal-body li::before { position: absolute; left: 0; top: .75em; height: .45rem; width: .45rem; border-radius: 9999px; background: var(--olive); content: ""; }
+.legal-body { color: #4b4c44; font-size: .975rem; line-height: 1.85; }
+.legal-body > * + * { margin-top: 1rem; }
+.legal-body h2 { margin-top: 2rem; color: var(--ink); font-family: "Poppins", sans-serif; font-size: 1.35rem; font-weight: 600; }
+.legal-body a { color: var(--forest); font-weight: 600; text-decoration: underline; }
 .social-share {
   display: inline-flex; align-items: center; gap: .5rem; border-radius: 9999px; padding: .5rem 1rem;
   background: #fff; box-shadow: inset 0 0 0 1px rgba(42, 43, 37, .12); font-weight: 500; transition: background .2s, color .2s;
