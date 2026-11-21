@@ -189,9 +189,22 @@ function restore_user_cart(): void
     persist_cart();
 }
 
+const PRODUCT_PLACEHOLDER_IMAGE = 'assets/images/fabrics/rust-tweed-texture.jpeg';
+
 function product_image(?string $image): string
 {
-    return $image ? url('uploads/products/' . rawurlencode(basename($image))) : 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80';
+    return $image ? url('uploads/products/' . rawurlencode(basename($image))) : url(PRODUCT_PLACEHOLDER_IMAGE);
+}
+
+function fabric_image(string $file): string
+{
+    return url('assets/images/fabrics/' . rawurlencode(basename($file)));
+}
+
+function fabric_collection(): array
+{
+    static $collection;
+    return $collection ??= require __DIR__ . '/fabric-collection.php';
 }
 
 function save_uploaded_image(string $field, string $folder): ?string

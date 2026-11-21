@@ -17,7 +17,7 @@ $reviewStmt->execute([$product['id']]);$reviews=$reviewStmt->fetchAll();
 $canReview=false;
 if(current_user()&&current_user()['role']==='customer'){$eligible=db()->prepare("SELECT o.id FROM orders o JOIN order_items oi ON oi.order_id=o.id WHERE o.user_id=? AND oi.product_id=? AND o.status='delivered' LIMIT 1");$eligible->execute([current_user()['id'],$product['id']]);$canReview=(bool)$eligible->fetchColumn();}
 $pageTitle = $product['name'] . ' | Yucca Fabrics';
-$schemaImage=$product['image']?absolute_url('uploads/products/'.rawurlencode(basename($product['image']))):'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=900&q=80';
+$schemaImage=$product['image']?absolute_url('uploads/products/'.rawurlencode(basename($product['image']))):absolute_url(PRODUCT_PLACEHOLDER_IMAGE);
 $structuredData=['@context'=>'https://schema.org','@type'=>'Product','name'=>$product['name'],'description'=>$product['description'],'sku'=>$product['sku'],'image'=>$schemaImage,'offers'=>['@type'=>'Offer','priceCurrency'=>CURRENCY,'price'=>(string)$price,'availability'=>(int)$product['stock']>0?'https://schema.org/InStock':'https://schema.org/OutOfStock','url'=>absolute_url('product-details.php?slug='.rawurlencode($product['slug']))]];
 require __DIR__ . '/includes/header.php';
 ?>
