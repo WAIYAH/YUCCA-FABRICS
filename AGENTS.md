@@ -11,8 +11,12 @@ consultations; staff manage everything from `/admin`.
 ## Stack
 
 - PHP 8.2 (no framework, no Composer) with PDO, running on XAMPP (Apache 2.4 + MariaDB 10.4).
-- Tailwind CSS from the CDN, configured inline in `includes/header.php` and `includes/admin-header.php`.
-  Brand colours: `forest` #2E7D32, `sage` #F9A825, `clay` #FF9800, `sand` #F8F9FA, `ink` #333333.
+- Tailwind CSS from the CDN. The theme lives in one file, `assets/js/tailwind-config.js`, loaded by both
+  `includes/header.php` and `includes/admin-header.php`. Colours come from the logo:
+  `forest` #3F5320 (primary), `olive` #5B7029, `sage` #647536 (small labels), `clay` #8C5530 (wood-brown accent),
+  `wheat` #D8B07E (accent on dark), `sand` #F7F4EE (page), `cream` #EFEADF (alternate sections),
+  `ink` #2A2B25 (text), `night` #252E16 (top bar and footer). Use these tokens, not raw hex values, and keep
+  text at WCAG AA contrast (all text tokens above pass on white and sand; use `wheat` for text on `night`).
   Fonts: Inter (body) and Poppins (`font-serif`, headings).
 - Small hand-written CSS in `assets/css/style.css` and vanilla JS in `assets/js/main.js`.
 - M-Pesa (Safaricom Daraja) payments in `payment/`, sandbox by default.
@@ -35,9 +39,15 @@ consultations; staff manage everything from `/admin`.
 ## Local setup
 
 1. Copy `.env.example` to `.env` and fill in the database credentials. Never commit `.env`.
-2. Import `database/yucca_fabrics.sql` into MariaDB.
-3. Create an admin: `C:\xampp\php\php.exe database\create_admin.php "Name" email username`.
-4. Serve through XAMPP so `.htaccess` rules apply (sitemap/robots rewrites, denied files).
+2. Import `database/yucca_fabrics.sql` into MariaDB as UTF-8:
+   `Get-Content database\yucca_fabrics.sql -Raw | C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4`.
+   The file also starts with `SET NAMES utf8mb4;`; without it Windows imports turn `é` and `–` into `├®` / `ÔÇô`.
+3. Add the fabric catalogue (18 products with photos, placeholder prices):
+   `C:\xampp\php\php.exe database\seed_fabric_products.php`. It copies the photos into `uploads/products/`,
+   is safe to re-run and never overwrites products edited in admin. For a new fabric, add the photo and an
+   entry in `includes/fabric-collection.php`, then its colour and description to the script's `$details`.
+4. Create an admin: `C:\xampp\php\php.exe database\create_admin.php "Name" email username`.
+5. Serve through XAMPP so `.htaccess` rules apply (sitemap/robots rewrites, denied files).
 
 `php` and `mysql` are not on PATH; use `C:\xampp\php\php.exe` and `C:\xampp\mysql\bin\mysql.exe`.
 
@@ -52,6 +62,16 @@ consultations; staff manage everything from `/admin`.
 - File uploads go through `save_uploaded_image()`, which validates type and size and stores a random
   filename under `uploads/<folder>/`.
 - Keep markup in the existing style: Tailwind utility classes, compact single-line sections.
+- `includes/header.php` opens `<main id="main">` and `includes/footer.php` closes it. Put each page block in
+  a top-level `<section>` inside it: `main.js` fades sections in on scroll (skipped for reduced motion).
+- Header navigation is defined once in the `$navLinks` and `$serviceLinks` arrays in `includes/header.php`
+  and rendered for both desktop and mobile; add pages there, not in two places.
+- Component classes (`nav-link`, `icon-button`, `mobile-link`, `footer-list`, `back-to-top`, `form-control`,
+  `eyebrow`) are defined in `assets/css/style.css`.
+- Social links come from `social_links()` in `includes/functions.php` (Instagram, Facebook, TikTok, WhatsApp).
+  Blank settings fall back to each platform's home page as a placeholder; use `whatsapp_url()` for any
+  WhatsApp link so the admin URL, or the business phone in international format, is used everywhere.
+- Footer grids need an explicit `grid-cols-1` on mobile, or a form input's natural width overflows 360 px.
 
 ## Images
 

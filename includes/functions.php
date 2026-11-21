@@ -113,7 +113,7 @@ function cart_items(): array
     }
     $ids = array_map('intval', array_keys($cart));
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = db()->prepare("SELECT id, name, slug, price, sale_price, stock, image FROM products WHERE is_active = 1 AND id IN ({$placeholders})");
+    $stmt = db()->prepare("SELECT id, name, slug, price, sale_price, stock, unit, image FROM products WHERE is_active = 1 AND id IN ({$placeholders})");
     $stmt->execute($ids);
     $items = [];
     foreach ($stmt->fetchAll() as $product) {
@@ -189,7 +189,20 @@ function restore_user_cart(): void
     persist_cart();
 }
 
-const PRODUCT_PLACEHOLDER_IMAGE = 'assets/images/fabrics/rust-tweed-texture.jpeg';
+// Neutral swatch photo, so a product without its own image never looks like another product.
+const PRODUCT_PLACEHOLDER_IMAGE = 'assets/images/fabrics/piki-17-fabric-samples.jpeg';
+
+/** Price markup for cards and the product page: sale price with the original struck through, plus the unit. */
+function product_price_html(array $product): string
+{
+    $unit = '<span class="text-xs font-normal text-gray-500"> / ' . e($product['unit'] ?? 'metre') . '</span>';
+    $price = (float) $product['price'];
+    $sale = $product['sale_price'] !== null ? (float) $product['sale_price'] : null;
+    if ($sale !== null && $sale < $price) {
+        return '<span class="text-clay">' . e(money($sale)) . '</span> <s class="text-xs font-normal text-gray-400">' . e(money($price)) . '</s>' . $unit;
+    }
+    return e(money($price)) . $unit;
+}
 
 function product_image(?string $image): string
 {
@@ -247,6 +260,29 @@ function setting(string $key, string $fallback = ''): string
         }
     }
     return (string) ($settings[$key] ?? $fallback);
+}
+
+function whatsapp_url(): string
+{
+    if (setting('whatsapp_url') !== '') return setting('whatsapp_url');
+    // wa.me needs the international format without "+", so a local 07… number becomes 2547….
+    $number = preg_replace('/\D/', '', setting('business_phone', '+254 700 000 000'));
+    if (str_starts_with($number, '0')) $number = '254' . substr($number, 1);
+    return 'https://wa.me/' . $number;
+}
+
+/**
+ * Footer social icons. Until real pages are entered in Admin → Website settings, each link falls back to the
+ * platform's home page as a placeholder (`?:` so a saved-but-blank setting also falls back).
+ */
+function social_links(): array
+{
+    return [
+        ['label' => 'Instagram', 'icon' => 'fa-instagram', 'url' => setting('instagram_url') ?: 'https://www.instagram.com/'],
+        ['label' => 'Facebook', 'icon' => 'fa-facebook-f', 'url' => setting('facebook_url') ?: 'https://www.facebook.com/'],
+        ['label' => 'TikTok', 'icon' => 'fa-tiktok', 'url' => setting('tiktok_url') ?: 'https://www.tiktok.com/'],
+        ['label' => 'WhatsApp', 'icon' => 'fa-whatsapp', 'url' => whatsapp_url()],
+    ];
 }
 
 function json_response(array $payload, int $status = 200): never
