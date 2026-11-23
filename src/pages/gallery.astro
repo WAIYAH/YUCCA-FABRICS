@@ -65,7 +65,7 @@ const [categories, projects] = await Promise.all([
   const title = document.getElementById('lightbox-title');
   const image = document.createElement('img');
   image.className = 'max-h-[80vh] w-full object-contain';
-  title?.before(image);
+  if (title) dialog?.insertBefore(image, title);
   document.querySelectorAll<HTMLElement>('[data-lightbox]').forEach((trigger) => trigger.addEventListener('click', () => {
     if (!dialog || !title) return;
     image.src = trigger.dataset.lightbox!;
