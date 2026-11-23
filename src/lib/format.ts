@@ -38,8 +38,17 @@ export function randomHex(bytes: number): string {
   return Array.from(values, (b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
 }
 
-/** "YF251123AB12CD34": prefix + yymmdd (Nairobi) + 8 hex characters. */
-export const makeReference = (prefix: string) => `${prefix}${todayInNairobi().slice(2).replaceAll('-', '')}${randomHex(4)}`;
+// Crockford base32: no I, L, O or U, so references are easy to read out over the phone.
+const REFERENCE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+/**
+ * "YF7K3QJ9X2MD": a 2-letter prefix + 10 random characters (32^10 ≈ 10^15 combinations). Exactly 12 characters,
+ * the most M-Pesa accepts as an AccountReference.
+ */
+export function makeReference(prefix: string): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(10));
+  return prefix + Array.from(bytes, (b) => REFERENCE_ALPHABET[b % 32]).join('');
+}
 
 /** URL-safe slug; a random suffix keeps admin-created slugs unique without a lookup. */
 export function slugify(text: string, withSuffix = false): string {

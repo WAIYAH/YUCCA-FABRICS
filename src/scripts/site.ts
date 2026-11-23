@@ -118,7 +118,7 @@ function setupForms() {
   // Forms marked data-ajax-form="actionName" call that Astro Action without a page reload.
   document.querySelectorAll<HTMLFormElement>('form[data-ajax-form]').forEach((form) => form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    type Result = { message?: string; redirect?: string; cartCount?: number; removed?: boolean };
+    type Result = { message?: string; redirect?: string; cartCount?: number; removed?: boolean; reload?: boolean };
     const action = (actions as unknown as Record<string, (input: FormData) => Promise<{ data?: Result; error?: unknown }>>)[form.dataset.ajaxForm!];
     if (!action) { form.submit(); return; }
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"],button:not([type])');
@@ -131,7 +131,7 @@ function setupForms() {
       if (typeof data?.cartCount === 'number') updateCartCount(data.cartCount);
       if (data?.removed) { form.closest('[data-removable]')?.remove(); return; }
       if (form.dataset.keep === undefined) form.reset();
-      if (form.dataset.reload === 'true') window.location.reload();
+      if (data?.reload || form.dataset.reload === 'true') window.location.reload();
     } catch (error) {
       notify(actionErrorMessage(error), true);
     } finally {

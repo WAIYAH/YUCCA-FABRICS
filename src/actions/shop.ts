@@ -2,7 +2,9 @@ import { ActionError, defineAction } from 'astro:actions';
 import { z } from 'astro/zod';
 import { optional, optionalText } from './fields';
 import { and, eq } from 'drizzle-orm';
-import { addToCart, CartError, cartCount } from '~/lib/cart';
+import { addToCart, CartError, cartCount, cartLines, ensureCartId, setCartCoupon, subtotalOf } from '~/lib/cart';
+import { checkCoupon } from '~/lib/coupons';
+import { formatMoney } from '~/lib/money';
 import { db, schema } from '~/lib/db';
 
 const productId = z.coerce.number().int().positive();
@@ -21,6 +23,24 @@ export const shop = {
     async handler({ product_id, quantity }, context) {
       const product = await addToCart(context, product_id, quantity ?? 1).catch(asActionError);
       return { message: `${product.name} added to your bag.`, cartCount: await cartCount(context) };
+    },
+  }),
+
+  coupon: defineAction({
+    accept: 'form',
+    input: z.object({ intent: z.enum(['apply', 'remove']), code: optional(z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{3,40}$/, 'That coupon code isn’t valid.')) }),
+    async handler({ intent, code }, context) {
+      const cartId = await ensureCartId(context);
+      if (intent === 'remove' || !code) {
+        await setCartCoupon(cartId, null);
+        return { message: 'Coupon removed.', reload: true };
+      }
+      const lines = await cartLines(cartId);
+      if (lines.length === 0) throw new ActionError({ code: 'BAD_REQUEST', message: 'Add something to your bag first.' });
+      const check = await checkCoupon(code, subtotalOf(lines), context.locals.user?.id ?? null);
+      if (!check.ok) throw new ActionError({ code: 'BAD_REQUEST', message: check.reason });
+      await setCartCoupon(cartId, check.coupon.code);
+      return { message: `Coupon applied: you save ${formatMoney(check.discountCents)}.`, reload: true };
     },
   }),
 
