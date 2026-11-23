@@ -8,7 +8,7 @@ import { availableStarts, hourSlots, type SlotRules } from '~/lib/availability';
 import { constraintFailed, db, runBatch, schema } from '~/lib/db';
 import { emailBody, sendEmail } from '~/lib/email';
 import { formatLongDate, formatTime, makeReference, nairobiToUtc } from '~/lib/format';
-import { createMeetEvent, googleConfigured, googleConnection } from '~/lib/google';
+import { cancelEvent, createMeetEvent, googleConfigured, googleConnection, rescheduleEvent } from '~/lib/google';
 import { googleCalendarLink, icsEvent } from '~/lib/ics';
 import { formatMoney } from '~/lib/money';
 import { emailBusinessDirect } from '~/lib/notify-business';
@@ -129,7 +129,9 @@ export async function onTrainingPaid(bookingId: number, waitUntil: WaitUntil) {
   if (!booking || booking.status === 'confirmed' || booking.status === 'completed') return;
   if ((await heldHours(bookingId)) !== booking.hours) {
     try {
+      // Expired holds (possibly this booking's own) are released first, so only a live booking can block us.
       await runBatch([
+        ...releaseExpiredHolds(Date.now()),
         db.delete(schema.trainingBookingHours).where(eq(schema.trainingBookingHours.bookingId, bookingId)),
         ...hourSlots(booking.startsAt.getTime(), booking.hours).map((slot) => db.insert(schema.trainingBookingHours).values({ slotStart: new Date(slot), bookingId })),
       ]);
@@ -228,4 +230,41 @@ export async function sendBookingEmail(booking: Booking, course: Course, kind: '
       content: icsEvent({ uid: `${booking.reference}@yuccafabrics`, start: booking.startsAt, end, summary, description: join, location: booking.meetingUrl ?? platform, url: bookingUrl(booking.reference) }),
     }],
   });
+}
+
+/**
+ * Moves a booking to a new time (staff action). The new hour rows are claimed in the same batch that frees the
+ * old ones, so a clash leaves the booking untouched. The Calendar event and the customer are updated.
+ */
+export async function rescheduleBooking(booking: Booking, course: Course, date: string, time: string) {
+  const startsAt = nairobiToUtc(date, time);
+  if (Number.isNaN(startsAt)) throw new BookingError('Choose a valid date and time.');
+  try {
+    await runBatch([
+      ...releaseExpiredHolds(Date.now()),
+      db.delete(schema.trainingBookingHours).where(eq(schema.trainingBookingHours.bookingId, booking.id)),
+      ...hourSlots(startsAt, booking.hours).map((slot) => db.insert(schema.trainingBookingHours).values({ slotStart: new Date(slot), bookingId: booking.id })),
+      db.update(t).set({ startsAt: new Date(startsAt) }).where(eq(t.id, booking.id)),
+    ]);
+  } catch (error) {
+    if (constraintFailed(error, 'UNIQUE')) throw new BookingError('That time overlaps another booking.', true);
+    throw error;
+  }
+  const moved = { ...booking, startsAt: new Date(startsAt) };
+  if (booking.calendarEventId && googleConfigured()) {
+    await rescheduleEvent(booking.calendarEventId, moved.startsAt, new Date(startsAt + booking.hours * HOUR))
+      .catch((error) => console.error('Calendar reschedule failed', { reference: booking.reference, error: String(error) }));
+  }
+  if (booking.status === 'confirmed') await sendBookingEmail(moved, course, 'rescheduled');
+}
+
+/** Cancels a booking, frees its time and cancels the Calendar event (Google tells the attendee). */
+export async function cancelBooking(booking: Booking) {
+  await runBatch([
+    db.delete(schema.trainingBookingHours).where(eq(schema.trainingBookingHours.bookingId, booking.id)),
+    db.update(t).set({ status: 'cancelled', holdExpiresAt: null }).where(eq(t.id, booking.id)),
+  ]);
+  if (booking.calendarEventId && googleConfigured()) {
+    await cancelEvent(booking.calendarEventId).catch((error) => console.error('Calendar cancel failed', { reference: booking.reference, error: String(error) }));
+  }
 }
