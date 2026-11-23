@@ -1,26 +1,8 @@
 // Site-wide behaviour, ported from the PHP site's main.js. Every feature is optional: pages work without JS.
-import { actions, isInputError } from 'astro:actions';
+import { actions } from 'astro:actions';
+import { actionErrorMessage, notify, updateCartCount } from './ui';
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-export function notify(message: string, isError = false) {
-  const toast = document.createElement('div');
-  toast.className = isError ? 'toast is-error' : 'toast';
-  toast.setAttribute('role', isError ? 'alert' : 'status');
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 4000);
-}
-
-/** First readable message from an action error (field errors first). */
-export function actionErrorMessage(error: unknown): string {
-  if (isInputError(error)) {
-    const first = Object.values(error.fields).flat()[0];
-    if (first) return first;
-  }
-  if (error instanceof Error && error.message) return error.message;
-  return 'Something went wrong. Please try again.';
-}
 
 function setupMenuAndSearch() {
   const toggle = document.getElementById('menu-toggle');
@@ -136,7 +118,8 @@ function setupForms() {
   // Forms marked data-ajax-form="actionName" call that Astro Action without a page reload.
   document.querySelectorAll<HTMLFormElement>('form[data-ajax-form]').forEach((form) => form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const action = (actions as unknown as Record<string, (input: FormData) => Promise<{ data?: { message?: string; redirect?: string }; error?: unknown }>>)[form.dataset.ajaxForm!];
+    type Result = { message?: string; redirect?: string; cartCount?: number; removed?: boolean };
+    const action = (actions as unknown as Record<string, (input: FormData) => Promise<{ data?: Result; error?: unknown }>>)[form.dataset.ajaxForm!];
     if (!action) { form.submit(); return; }
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"],button:not([type])');
     if (button) button.disabled = true;
@@ -145,7 +128,9 @@ function setupForms() {
       if (error) throw error;
       if (data?.redirect) { window.location.assign(data.redirect); return; }
       notify(data?.message ?? 'Thank you.');
-      form.reset();
+      if (typeof data?.cartCount === 'number') updateCartCount(data.cartCount);
+      if (data?.removed) { form.closest('[data-removable]')?.remove(); return; }
+      if (form.dataset.keep === undefined) form.reset();
       if (form.dataset.reload === 'true') window.location.reload();
     } catch (error) {
       notify(actionErrorMessage(error), true);

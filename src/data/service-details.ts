@@ -89,4 +89,8 @@ export const CONSULTATION_TYPES = [
 
 export const PROPERTY_TYPES = ['Home', 'Apartment', 'Office', 'Hospitality / retail', 'Other'] as const;
 
-export const BUDGET_RANGES = ['Under KES 50,000', 'KES 50,000–150,000', 'KES 150,000–500,000', 'KES 500,000+'] as const;
+/** Consultation start times, every 30 minutes from 9:00 AM to 5:00 PM (Nairobi time). */
+export const CONSULTATION_TIMES = Array.from({ length: 17 }, (_, i) =>
+  `${String(9 + Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`);
+
+export const BUDGET_RANGES =['Under KES 50,000', 'KES 50,000–150,000', 'KES 150,000–500,000', 'KES 500,000+'] as const;
