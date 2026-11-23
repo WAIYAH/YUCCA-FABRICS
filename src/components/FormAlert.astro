@@ -1,0 +1,17 @@
+---
+import Icon from './Icon.astro';
+import type { FlashType } from '~/lib/flash';
+
+interface Props { message: string; type?: FlashType; class?: string }
+const { message, type = 'error', class: className = '' } = Astro.props;
+const styles = {
+  error: ['border-[#8f4038]/30 bg-[#fbeeec] text-[#7a3530]', 'fa6-solid:circle-exclamation'],
+  success: ['border-forest/25 bg-[#eef3e6] text-forest', 'fa6-solid:circle-check'],
+  info: ['border-teal/25 bg-[#e8f1f2] text-teal', 'fa6-solid:circle-info'],
+} as const;
+const [classes, icon] = styles[type];
+---
+<div class:list={['flex items-start gap-3 rounded-lg border px-4 py-3 text-sm leading-6', classes, className]} role={type === 'error' ? 'alert' : 'status'}>
+  <Icon name={icon} class="mt-1 shrink-0" />
+  <p>{message}</p>
+</div>

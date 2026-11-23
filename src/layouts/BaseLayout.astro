@@ -1,0 +1,69 @@
+---
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '~/styles/global.css';
+import { env } from 'cloudflare:workers';
+import FormAlert from '~/components/FormAlert.astro';
+import Footer from '~/components/Footer.astro';
+import Header from '~/components/Header.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** JSON-LD object(s) for the page. */
+  structuredData?: object | object[];
+  image?: string;
+  noindex?: boolean;
+}
+const {
+  title = 'Yucca Fabrics | A Softer Place to Land',
+  description = 'Discover beautiful fabrics, upholstery craftsmanship, interior design and virtual classes at Yucca Fabrics.',
+  structuredData,
+  image = '/images/fabrics/santa-boucle.jpeg',
+  noindex = false,
+} = Astro.props;
+const siteUrl = env.SITE_URL || Astro.url.origin;
+const canonical = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImage = new URL(image, siteUrl).toString();
+// "<" is escaped so a value can never close the script tag early.
+const jsonLd = structuredData ? JSON.stringify(structuredData).replace(/</g, '\\u003c') : null;
+const { flash } = Astro.locals;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#3F5320" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Yucca Fabrics" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/jpeg" href="/images/yucca-fabrics-logo.jpeg" />
+    {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
+  </head>
+  <body id="top" class="bg-sand font-sans text-ink antialiased">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      {flash && <div class="mx-auto max-w-7xl px-5 pt-6"><FormAlert message={flash.message} type={flash.type} /></div>}
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import '~/scripts/site';
+    </script>
+  </body>
+</html>
