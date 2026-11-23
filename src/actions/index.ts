@@ -3,9 +3,11 @@
 import { forms } from './forms';
 import { payments } from './payments';
 import { shop } from './shop';
+import { training } from './training';
 
 export const server = {
   ...forms,
   ...shop,
   ...payments,
+  ...training,
 };

@@ -197,3 +197,13 @@ export const TRAINING_RULES = {
   /** How long an unpaid booking holds its slot. */
   holdMinutes: 15,
 };
+
+export const SKILL_LEVELS = ['Complete beginner', 'Some experience', 'Working professional'] as const;
+
+export const PLATFORM_DETAILS = {
+  google_meet: { icon: 'fa6-solid:video', note: 'A Meet link and calendar invite are emailed to you once you’ve paid. Works in your browser.' },
+  zoom: { icon: 'fa6-solid:display', note: 'We email your Zoom link before the session. Use the Zoom app or your browser.' },
+  whatsapp: { icon: 'fa6-brands:whatsapp', note: 'We video-call the phone number you give us at the start time.' },
+} as const;
+
+export const LEVEL_LABELS = { beginner: 'Beginner', 'all levels': 'All levels', advanced: 'Advanced' } as const;

@@ -42,6 +42,8 @@
   body { overflow-x: hidden; }
   ::selection { background: var(--color-wheat); color: var(--color-night); }
   #main:focus { outline: none; }
+  /* Fieldsets default to min-width: min-content, so a scrolling row inside one would widen the page. */
+  fieldset { min-width: 0; }
   :focus-visible { outline: 2px solid var(--color-olive); outline-offset: 3px; border-radius: 2px; }
   footer :focus-visible, .bg-forest :focus-visible, .bg-night :focus-visible { outline-color: var(--color-wheat); }
   button:not(:disabled), [role='button']:not(:disabled) { cursor: pointer; }
