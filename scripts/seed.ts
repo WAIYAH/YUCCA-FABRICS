@@ -134,7 +134,7 @@ statements.push("WITH RECURSIVE days(d) AS (SELECT 1 UNION ALL SELECT d + 1 FROM
 /* Settings. Milestone numbers stay blank until the owner verifies them in admin. */
 const settings: Record<string, string> = {
   business_address: 'Nairobi, Kenya',
-  business_phone: '+254 700 000 000',
+  business_phone: '+254 119 935 009',
   business_email: 'hello@yuccahomeware.com',
   business_hours: 'Monday–Saturday, 9:00 AM–5:00 PM',
   bank_details: '',

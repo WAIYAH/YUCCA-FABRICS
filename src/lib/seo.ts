@@ -22,11 +22,11 @@ export function metaDescription(text: string, max = 158): string {
 }
 
 /**
- * LocalBusiness JSON-LD for the shop in Nairobi County. Phone, street address and social profiles are only
- * included once an admin has replaced the placeholders, so search engines never receive made-up details.
+ * LocalBusiness JSON-LD for the shop in Nairobi County. The street address and social profiles are only
+ * included once an admin has set them, so search engines never receive made-up details.
  */
 export function businessJsonLd(settings: Settings, origin: string) {
-  const phone = setting(settings, 'business_phone');
+  const phone = setting(settings, 'business_phone', DEFAULT_PHONE);
   const email = setting(settings, 'business_email');
   const address = setting(settings, 'business_address');
   const sameAs = ['instagram_url', 'facebook_url', 'tiktok_url', 'whatsapp_url'].map((key) => setting(settings, key)).filter(Boolean);
@@ -40,7 +40,7 @@ export function businessJsonLd(settings: Settings, origin: string) {
     url: absoluteUrl('/', origin),
     logo: absoluteUrl('/images/yucca-homeware-logo.jpeg', origin),
     image: absoluteUrl('/images/fabrics/santa-boucle.jpeg', origin),
-    telephone: phone && phone !== DEFAULT_PHONE ? phone : undefined,
+    telephone: phone,
     email: email || undefined,
     address: {
       '@type': 'PostalAddress',

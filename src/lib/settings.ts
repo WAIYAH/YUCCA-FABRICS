@@ -14,11 +14,11 @@ export async function getSettings(locals: App.Locals): Promise<Settings> {
 
 export const setting = (settings: Settings, key: string, fallback = '') => settings[key]?.trim() || fallback;
 
-export const DEFAULT_PHONE = '+254 700 000 000';
+export const DEFAULT_PHONE = '+254 119 935 009';
 export const DEFAULT_EMAIL = 'hello@yuccahomeware.com';
 export const DEFAULT_ADDRESS = 'Nairobi, Kenya';
 
-/** "tel:+254700000000" */
+/** "tel:+254119935009" */
 export const telHref = (phone: string) => `tel:${phone.replace(/[^0-9+]/g, '')}`;
 
 /** The admin's WhatsApp URL, or wa.me with the business phone in international format. */
