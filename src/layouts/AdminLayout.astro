@@ -7,6 +7,7 @@ import '@fontsource/poppins/600.css';
 import '~/styles/global.css';
 import FormAlert from '~/components/FormAlert.astro';
 import Icon from '~/components/Icon.astro';
+import { adminNotifications } from '~/lib/admin-notifications';
 
 interface Props { title: string; heading: string; intro?: string }
 const { title, heading, intro } = Astro.props;
@@ -30,6 +31,9 @@ const sections = [
 ];
 const isActive = (href: string) => (href === '/admin' ? path === '/admin' : path === href || path.startsWith(`${href}/`));
 const { flash, user } = Astro.locals;
+const notifications = await adminNotifications();
+const waiting = notifications.reduce((sum, item) => sum + item.count, 0);
+const menuLink = 'flex items-center gap-3 px-4 py-2.5 transition hover:bg-cream hover:text-forest';
 ---
 <!doctype html>
 <html lang="en">
@@ -50,16 +54,40 @@ const { flash, user } = Astro.locals;
         </div>
         <nav id="admin-nav" class="hidden gap-1 px-3 pb-5 text-sm lg:grid" aria-label="Admin">
           {sections.map((section) => <a class:list={['admin-link', { 'is-active': isActive(section.href) }]} href={section.href} aria-current={isActive(section.href) ? 'page' : undefined}><Icon name={section.icon} class="w-4 text-wheat" />{section.label}</a>)}
-          <div class="mt-4 grid gap-1 border-t border-white/15 pt-4">
-            <a class="admin-link text-white/80" href="/" target="_blank" rel="noopener"><Icon name="fa6-solid:arrow-up-right-from-square" class="w-4" />View website</a>
-            <form action="/auth/logout" method="post"><button class="admin-link w-full text-left text-white/80"><Icon name="fa6-solid:arrow-right-from-bracket" class="w-4" />Sign out</button></form>
-          </div>
         </nav>
       </aside>
       <div class="min-w-0 flex-1">
-        <header class="flex flex-wrap items-center justify-between gap-3 border-b border-ink/5 bg-white px-5 py-4 md:px-8">
-          <p class="text-xs uppercase tracking-[.2em] text-gray-500">Yucca Homeware · administration</p>
-          <p class="text-sm">Signed in as <strong>{user?.name}</strong></p>
+        <header class="flex items-center justify-between gap-3 border-b border-ink/5 bg-white px-5 py-2.5 md:px-8">
+          <p class="hidden text-xs uppercase tracking-[.2em] text-gray-500 sm:block">Yucca Homeware · administration</p>
+          <!-- Both panels anchor to this wrapper's right edge (the dropdowns are not positioned), so they stay on screen at 360 px. -->
+          <div class="relative ml-auto flex items-center gap-1">
+            <div class="dropdown" data-dropdown>
+              <button type="button" class="icon-button relative" aria-expanded="false" aria-controls="admin-notifications" aria-label={waiting ? `Notifications: ${waiting} waiting` : 'Notifications: all caught up'}>
+                <Icon name="fa6-regular:bell" class="text-lg" />
+                {waiting > 0 && <span aria-hidden="true" class="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-clay px-1 text-[10px] font-semibold text-white">{waiting > 99 ? '99+' : waiting}</span>}
+              </button>
+              <div id="admin-notifications" class="dropdown-panel dropdown-panel-end absolute right-0 top-full z-50 w-80 max-w-[calc(100vw-2.5rem)] pt-3">
+                <div class="overflow-hidden rounded-lg border border-ink/10 bg-white py-2 text-sm shadow-xl shadow-ink/10">
+                  <p class="border-b border-ink/10 px-4 pb-3 pt-1 font-semibold">Needs your attention</p>
+                  {notifications.length === 0
+                    ? <p class="flex items-center gap-3 px-4 py-4 text-gray-600"><Icon name="fa6-solid:circle-check" class="text-sage" />You’re all caught up.</p>
+                    : notifications.map((item) => <a class={menuLink} href={item.href}><Icon name={item.icon} class="w-4 shrink-0 text-sage" /><span class="flex-1">{item.label}</span><span class="rounded-full bg-cream px-2 py-0.5 text-xs font-semibold text-ink">{item.count}</span></a>)}
+                </div>
+              </div>
+            </div>
+            <div class="dropdown" data-dropdown>
+              <button type="button" class="icon-button" aria-expanded="false" aria-controls="admin-profile-menu" aria-label="Profile menu"><Icon name="fa6-regular:circle-user" class="text-xl" /></button>
+              <div id="admin-profile-menu" class="dropdown-panel dropdown-panel-end absolute right-0 top-full z-50 w-64 max-w-[calc(100vw-2.5rem)] pt-3">
+                <div class="overflow-hidden rounded-lg border border-ink/10 bg-white py-2 text-sm shadow-xl shadow-ink/10">
+                  <p class="border-b border-ink/10 px-4 pb-3 pt-1"><strong class="block truncate">{user?.name}</strong><span class="block truncate text-xs text-gray-500">{user?.email}</span></p>
+                  <a class:list={[menuLink, 'mt-1']} href="/account/profile"><Icon name="fa6-regular:user" class="w-4 text-sage" />My profile</a>
+                  <a class={menuLink} href="/admin/settings"><Icon name="fa6-solid:gear" class="w-4 text-sage" />Settings</a>
+                  <a class={menuLink} href="/" target="_blank" rel="noopener"><Icon name="fa6-solid:arrow-up-right-from-square" class="w-4 text-sage" />View website</a>
+                  <form action="/auth/logout" method="post" class="mt-1 border-t border-ink/10 pt-1"><button class="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-cream hover:text-clay"><Icon name="fa6-solid:arrow-right-from-bracket" class="w-4" />Sign out</button></form>
+                </div>
+              </div>
+            </div>
+          </div>
         </header>
         <main id="main" tabindex="-1" class="mx-auto max-w-7xl p-5 md:p-8">
           <div class="mb-6"><h1 class="font-serif text-3xl sm:text-4xl">{heading}</h1>{intro && <p class="mt-2 max-w-2xl text-sm text-gray-600">{intro}</p>}</div>
