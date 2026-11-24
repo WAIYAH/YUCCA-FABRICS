@@ -17,3 +17,6 @@ GOOGLE_CLIENT_SECRET=
 # 32-byte key, base64 (encrypts the stored Google refresh token):
 #   node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 TOKEN_ENCRYPTION_KEY=
+
+# wrangler.jsonc sets SITE_URL to the live domain; override it for local development.
+SITE_URL=http://localhost:4321

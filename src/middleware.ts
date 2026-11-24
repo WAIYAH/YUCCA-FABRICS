@@ -1,3 +1,4 @@
+import { env } from 'cloudflare:workers';
 import { defineMiddleware } from 'astro:middleware';
 import { auth, type SessionUser } from '~/lib/auth';
 import { setFlash, takeFlash } from '~/lib/flash';
@@ -13,8 +14,14 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
 };
 
+// Search engines should see one host, so www.<domain> permanently redirects to the SITE_URL host.
+const canonicalHost = URL.canParse(env.SITE_URL) ? new URL(env.SITE_URL).host : '';
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+  if (canonicalHost && context.url.host === `www.${canonicalHost}`) {
+    return Response.redirect(new URL(pathname + context.url.search, env.SITE_URL).toString(), 301);
+  }
   context.locals.user = null;
   context.locals.flash = null;
 

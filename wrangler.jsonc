@@ -5,11 +5,11 @@
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
   "vars": {
-    "SITE_URL": "http://localhost:4321",
+    "SITE_URL": "https://yuccahomeware.com",
     "TAX_RATE": "0.16",
     "DELIVERY_FEE": "350",
     "MPESA_ENV": "sandbox",
-    "EMAIL_FROM": "hello@example.com"
+    "EMAIL_FROM": "hello@yuccahomeware.com"
   },
   // database_id and bucket are created on first deploy (auto-provisioning); local dev uses Miniflare.
   "d1_databases": [

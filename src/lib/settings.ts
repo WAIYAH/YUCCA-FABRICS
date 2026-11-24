@@ -15,7 +15,7 @@ export async function getSettings(locals: App.Locals): Promise<Settings> {
 export const setting = (settings: Settings, key: string, fallback = '') => settings[key]?.trim() || fallback;
 
 export const DEFAULT_PHONE = '+254 700 000 000';
-export const DEFAULT_EMAIL = 'hello@yuccafabrics.co.ke';
+export const DEFAULT_EMAIL = 'hello@yuccahomeware.com';
 export const DEFAULT_ADDRESS = 'Nairobi, Kenya';
 
 /** "tel:+254700000000" */
