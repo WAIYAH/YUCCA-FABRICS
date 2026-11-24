@@ -1,7 +1,7 @@
 ---
 import { actions } from 'astro:actions';
 import Icon from './Icon.astro';
-import { DEFAULT_ADDRESS, DEFAULT_EMAIL, DEFAULT_PHONE, getSettings, setting, socialLinks, telHref } from '~/lib/settings';
+import { DEFAULT_EMAIL, DEFAULT_PHONE, getSettings, setting, socialLinks, telHref } from '~/lib/settings';
 
 const settings = await getSettings(Astro.locals);
 const phone = setting(settings, 'business_phone', DEFAULT_PHONE);
@@ -41,9 +41,8 @@ const newsletterMessage = newsletterResult?.error ? 'Enter a valid email address
     </div>
     <div class="lg:col-span-2"><h2 class="footer-heading">Shop</h2><ul class="footer-list"><li><a href="/shop">All fabrics</a></li><li><a href="/shop?sort=newest">New arrivals</a></li><li><a href="/gallery#fabric-lookbook">Fabric lookbook</a></li><li><a href="/cart">Shopping bag</a></li><li><a href={Astro.locals.user ? '/account/orders' : '/auth/login'}>Track an order</a></li></ul></div>
     <div class="lg:col-span-2"><h2 class="footer-heading">Studio</h2><ul class="footer-list"><li><a href="/services">Upholstery services</a></li><li><a href="/consultations">Interior design</a></li><li><a href="/classes">Virtual classes</a></li><li><a href="/gallery">Our projects</a></li><li><a href="/journal">Journal</a></li><li><a href="/about">About us</a></li></ul></div>
-    <div class="sm:col-span-2 lg:col-span-3"><h2 class="footer-heading">Visit or call</h2>
+    <div class="sm:col-span-2 lg:col-span-3"><h2 class="footer-heading">Call or email</h2>
       <ul class="footer-list">
-        <li class="flex gap-3"><Icon name="fa6-solid:location-dot" class="mt-1 w-4 shrink-0 text-wheat" /><span>{setting(settings, 'business_address', DEFAULT_ADDRESS)}</span></li>
         <li class="flex gap-3"><Icon name="fa6-solid:phone" class="mt-1 w-4 shrink-0 text-wheat" /><a href={telHref(phone)}>{phone}</a></li>
         <li class="flex gap-3"><Icon name="fa6-regular:envelope" class="mt-1 w-4 shrink-0 text-wheat" /><a class="break-all" href={`mailto:${email}`}>{email}</a></li>
         {hours && <li class="flex gap-3"><Icon name="fa6-regular:clock" class="mt-1 w-4 shrink-0 text-wheat" /><span>{hours}</span></li>}

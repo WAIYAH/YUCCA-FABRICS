@@ -13,7 +13,7 @@ import { todayInNairobi } from '~/lib/format';
 import { formatMoneyWhole } from '~/lib/money';
 import { breadcrumbJsonLd, businessId, businessJsonLd, metaDescription, siteOrigin } from '~/lib/seo';
 import { activeServices, isConsultationService } from '~/lib/services';
-import { DEFAULT_ADDRESS, DEFAULT_PHONE, getSettings, setting, telHref, whatsappUrl } from '~/lib/settings';
+import { DEFAULT_PHONE, getSettings, setting, telHref, whatsappUrl } from '~/lib/settings';
 
 const [services, [fabrics]] = await Promise.all([
   activeServices(),
@@ -38,7 +38,7 @@ const structuredData = [
   breadcrumbJsonLd(origin, [['Services', '/services']]),
 ];
 const steps = [
-  ['fa6-solid:camera', '#1F5B43', 'text-white', 'Share your piece', `Send a photo and a few details with the form below, or visit us in ${setting(settings, 'business_address', DEFAULT_ADDRESS)}.`],
+  ['fa6-solid:camera', '#1F5B43', 'text-white', 'Share your piece', 'Send a photo and a few details with the form below.'],
   ['fa6-solid:swatchbook', '#E3A82B', 'text-ink', 'Choose your fabric', 'Browse the collection online or compare samples with us until one feels right.'],
   ['fa6-solid:handshake', '#16646E', 'text-white', 'Agree the quote', 'We confirm the work, the price and the timing with you before anything begins.'],
   ['fa6-solid:couch', '#A9461E', 'text-white', 'Enjoy it again', 'Your piece is finished with care and ready to take its place at home.'],
