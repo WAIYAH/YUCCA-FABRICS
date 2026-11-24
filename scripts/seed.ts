@@ -23,15 +23,15 @@ const cents = (kes: number) => Math.round(kes * 100);
 
 const statements: string[] = [];
 
-/* Shop categories */
+/* Shop categories, in homepage tile order */
 const shopCategories = [
   ['Upholstery Fabrics', 'upholstery-fabrics', 'Hard-wearing textiles for the furniture you love.'],
-  ['Curtain Fabrics', 'curtain-fabrics', 'Beautiful drapery fabrics to soften the light.'],
   ['Cushions & Accessories', 'cushions-accessories', 'Finishing touches for a considered room.'],
-  ['Outdoor Fabrics', 'outdoor-fabrics', 'Durable, colourfast fabrics for outdoor living.'],
   ['Home Décor', 'home-decor', 'Objects and details that make a space yours.'],
+  ['Outdoor Fabrics', 'outdoor-fabrics', 'Durable, colourfast fabrics for outdoor living.'],
+  ['Curtain Fabrics', 'curtain-fabrics', 'Beautiful drapery fabrics to soften the light.'],
 ];
-for (const [name, slug, description] of shopCategories) statements.push(insert('categories', { name, slug, description }));
+shopCategories.forEach(([name, slug, description], index) => statements.push(insert('categories', { name, slug, description, sort_order: index + 1 })));
 
 /* Fabric catalogue. Placeholder prices (KES per metre) by type: replace them in Admin → Products. */
 const featured = new Set(['santa-boucle.jpeg', 'bella-fur.jpeg', 'coco-boucle.jpeg', 'harmony-linen.jpeg']);

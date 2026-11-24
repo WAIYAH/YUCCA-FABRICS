@@ -45,7 +45,7 @@ export async function productBySlug(slug: string) {
 }
 
 export const activeCategories = () =>
-  db.select({ id: c.id, name: c.name, slug: c.slug, image: c.image }).from(c).where(eq(c.isActive, true)).orderBy(asc(c.name));
+  db.select({ id: c.id, name: c.name, slug: c.slug, image: c.image }).from(c).where(eq(c.isActive, true)).orderBy(asc(c.sortOrder), asc(c.name));
 
 export const SHOP_SORTS = { newest: 'Newest', popularity: 'Popularity', rating: 'Rating', name: 'Name' } as const;
 export type ShopSort = keyof typeof SHOP_SORTS;

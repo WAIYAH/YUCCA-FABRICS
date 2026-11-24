@@ -83,6 +83,7 @@ export const categories = sqliteTable('categories', {
   slug: text('slug').notNull().unique(),
   description: text('description'),
   image: text('image'),
+  sortOrder: integer('sort_order').notNull().default(0),
   isActive: flag('is_active', true),
   createdAt: createdAt(),
 });
