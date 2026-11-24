@@ -16,10 +16,13 @@
     "MPESA_ENV": "sandbox",
     "EMAIL_FROM": "hello@yuccahomeware.com"
   },
-  // database_id and bucket are created on first deploy (auto-provisioning); local dev uses Miniflare.
+  // IDs of the production resources, pinned so preview uploads (which can't inherit bindings) and deploys use
+  // the same database and session store. Local dev uses Miniflare copies.
   "d1_databases": [
-    { "binding": "DB", "database_name": "yucca-db", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "yucca-db", "database_id": "a31a2f05-7fd0-42e6-95d2-ea1bedee6284", "migrations_dir": "migrations" }
   ],
+  // Astro sessions (the Cloudflare adapter uses the SESSION binding).
+  "kv_namespaces": [{ "binding": "SESSION", "id": "a88a7608361947eda3044cee877138bc" }],
   "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "yucca-uploads" }],
   "send_email": [{ "name": "EMAIL" }]
 }
