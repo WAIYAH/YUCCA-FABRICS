@@ -1,9 +1,9 @@
 import { env } from 'cloudflare:workers';
 import { DEFAULT_ADDRESS, DEFAULT_PHONE, setting, type Settings } from '~/lib/settings';
 
-export const BUSINESS_NAME = 'Yucca Fabrics';
-/** Other names people search for: the domain name and the training brand. */
-export const BUSINESS_ALT_NAMES = ['Yucca Homeware', 'Yucca Homeware Consultant'];
+export const BUSINESS_NAME = 'Yucca Homeware';
+/** Other names people search for: the former shop name and the training brand. */
+export const BUSINESS_ALT_NAMES = ['Yucca Fabrics', 'Yucca Homeware Consultant'];
 export const BUSINESS_SUMMARY =
   'Upholstery fabrics by the metre, furniture reupholstery, interior design consultations and virtual classes in Nairobi, Kenya.';
 
@@ -38,7 +38,7 @@ export function businessJsonLd(settings: Settings, origin: string) {
     alternateName: BUSINESS_ALT_NAMES,
     description: BUSINESS_SUMMARY,
     url: absoluteUrl('/', origin),
-    logo: absoluteUrl('/images/yucca-fabrics-logo.jpeg', origin),
+    logo: absoluteUrl('/images/yucca-homeware-logo.jpeg', origin),
     image: absoluteUrl('/images/fabrics/santa-boucle.jpeg', origin),
     telephone: phone && phone !== DEFAULT_PHONE ? phone : undefined,
     email: email || undefined,

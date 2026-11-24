@@ -1,6 +1,6 @@
-# Yucca Fabrics
+# Yucca Homeware
 
-Online shop and booking site for Yucca Fabrics, a Kenyan upholstery and interior-design studio.
+Online shop and booking site for Yucca Homeware, a Kenyan upholstery and interior-design studio.
 
 Customers can:
 

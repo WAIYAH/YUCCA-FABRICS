@@ -37,15 +37,15 @@ const { flash, user } = Astro.locals;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <title>{title} · Admin · Yucca Fabrics</title>
-    <link rel="icon" type="image/jpeg" href="/images/yucca-fabrics-logo.jpeg" />
+    <title>{title} · Admin · Yucca Homeware</title>
+    <link rel="icon" type="image/jpeg" href="/images/yucca-homeware-logo.jpeg" />
   </head>
   <body class="bg-sand font-sans text-ink antialiased">
     <a href="#main" class="skip-link">Skip to content</a>
     <div class="min-h-screen lg:flex">
       <aside class="bg-forest text-white lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:overflow-y-auto">
         <div class="flex items-center justify-between p-5">
-          <a href="/admin" class="flex items-center gap-3" aria-label="Admin overview"><img src="/images/yucca-fabrics-logo.jpeg" alt="" class="h-12 w-12 rounded-lg bg-white object-contain p-1" /><span class="leading-tight"><span class="block font-serif font-semibold tracking-[.18em]">YUCCA</span><span class="block text-[10px] uppercase tracking-[.3em] text-wheat">Studio admin</span></span></a>
+          <a href="/admin" class="flex items-center gap-3" aria-label="Admin overview"><img src="/images/yucca-homeware-logo.jpeg" alt="" class="h-12 w-12 rounded-lg bg-white object-contain p-1" /><span class="leading-tight"><span class="block font-serif font-semibold tracking-[.18em]">YUCCA</span><span class="block text-[10px] uppercase tracking-[.3em] text-wheat">Studio admin</span></span></a>
           <button id="admin-menu-toggle" type="button" class="icon-button text-white hover:bg-white/10 lg:hidden" aria-expanded="false" aria-controls="admin-nav" aria-label="Admin menu"><Icon name="fa6-solid:bars" /></button>
         </div>
         <nav id="admin-nav" class="hidden gap-1 px-3 pb-5 text-sm lg:grid" aria-label="Admin">
@@ -58,7 +58,7 @@ const { flash, user } = Astro.locals;
       </aside>
       <div class="min-w-0 flex-1">
         <header class="flex flex-wrap items-center justify-between gap-3 border-b border-ink/5 bg-white px-5 py-4 md:px-8">
-          <p class="text-xs uppercase tracking-[.2em] text-gray-500">Yucca Fabrics · administration</p>
+          <p class="text-xs uppercase tracking-[.2em] text-gray-500">Yucca Homeware · administration</p>
           <p class="text-sm">Signed in as <strong>{user?.name}</strong></p>
         </header>
         <main id="main" tabindex="-1" class="mx-auto max-w-7xl p-5 md:p-8">

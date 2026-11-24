@@ -42,7 +42,7 @@ if (Astro.request.method === 'POST' && cartId) {
       const link = new URL(`/order/${order.orderNumber}?t=${order.accessToken}`, Astro.url).toString();
       Astro.locals.cfContext.waitUntil(sendEmail({
         to: values.email,
-        subject: `Your Yucca Fabrics order ${order.orderNumber}`,
+        subject: `Your Yucca Homeware order ${order.orderNumber}`,
         text: emailBody(
           `Hello ${values.name},`,
           `Thank you for your order ${order.orderNumber}.`,
@@ -71,7 +71,7 @@ const paymentOptions = [
   ['cod', 'fa6-solid:money-bill-wave', 'Pay when your order arrives.'],
 ] as const;
 ---
-<BaseLayout title="Checkout | Yucca Fabrics" noindex>
+<BaseLayout title="Checkout | Yucca Homeware" noindex>
   <section class="bg-cream"><div class="mx-auto max-w-7xl px-5 py-10"><p class="eyebrow">Almost yours</p><h1 class="mt-2 font-serif text-3xl sm:text-4xl">Delivery &amp; payment</h1><CheckoutSteps current={2} /></div></section>
   <section class="mx-auto max-w-7xl px-5 py-10">
     {errors.map((error) => <FormAlert message={error} class="mb-5" />)}

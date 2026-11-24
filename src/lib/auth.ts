@@ -26,7 +26,7 @@ export const auth = betterAuth({
       const link = new URL(`/auth/reset-password?token=${encodeURIComponent(token)}`, env.SITE_URL).toString();
       await sendEmail({
         to: user.email,
-        subject: 'Reset your Yucca Fabrics password',
+        subject: 'Reset your Yucca Homeware password',
         text: emailBody(
           `Hello ${user.name},`,
           `We received a request to reset your password. Use this link within one hour:\n${link}`,

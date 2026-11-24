@@ -26,7 +26,7 @@ const structuredData = [{
   hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H' },
 }, breadcrumbJsonLd(origin, [['Virtual classes', '/classes'], [course.title, `/classes/${course.slug}`]])];
 ---
-<BaseLayout title={`${course.title} · virtual class | Yucca Fabrics`} description={`${course.summary} Live online, ${formatMoneyWhole(course.hourlyRateCents)} per hour.`} image={serviceImage(look.image)} structuredData={structuredData}>
+<BaseLayout title={`${course.title} · virtual class | Yucca Homeware`} description={`${course.summary} Live online, ${formatMoneyWhole(course.hourlyRateCents)} per hour.`} image={serviceImage(look.image)} structuredData={structuredData}>
   <section class="relative overflow-hidden text-white" style={`background-color:${track.bg}`}>
     <YuccaSprig class="pointer-events-none absolute -bottom-24 -left-16 h-96 w-96 text-white/5" />
     <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-14 lg:grid-cols-[1.1fr_.9fr] lg:py-20">

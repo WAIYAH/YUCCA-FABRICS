@@ -41,7 +41,7 @@ const itemCount = lines.reduce((n, line) => n + line.quantity, 0);
 const suggestions = lines.length ? [] : (await featuredProducts(8)).filter((p) => p.stock > 0).slice(0, 4);
 const settings = await getSettings(Astro.locals);
 ---
-<BaseLayout title="Your shopping bag | Yucca Fabrics" noindex>
+<BaseLayout title="Your shopping bag | Yucca Homeware" noindex>
   <section class="bg-cream"><div class="mx-auto max-w-7xl px-5 py-10"><p class="eyebrow">The things you love</p><h1 class="mt-2 font-serif text-3xl sm:text-4xl">Your shopping bag</h1><CheckoutSteps current={1} /></div></section>
   <section class="mx-auto max-w-7xl px-5 py-10">
     {lines.length === 0 ? (

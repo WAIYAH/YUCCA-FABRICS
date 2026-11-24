@@ -17,7 +17,7 @@ export interface OutgoingEmail {
 export async function sendEmail(message: OutgoingEmail): Promise<boolean> {
   try {
     await env.EMAIL.send({
-      from: { name: 'Yucca Fabrics', email: env.EMAIL_FROM },
+      from: { name: 'Yucca Homeware', email: env.EMAIL_FROM },
       to: message.to,
       subject: message.subject,
       text: message.text,
@@ -33,4 +33,4 @@ export async function sendEmail(message: OutgoingEmail): Promise<boolean> {
 }
 
 /** Plain-text email body with the business sign-off. */
-export const emailBody = (...paragraphs: string[]) => `${paragraphs.join('\n\n')}\n\nWarm regards,\nYucca Fabrics\n${env.SITE_URL}`;
+export const emailBody = (...paragraphs: string[]) => `${paragraphs.join('\n\n')}\n\nWarm regards,\nYucca Homeware\n${env.SITE_URL}`;

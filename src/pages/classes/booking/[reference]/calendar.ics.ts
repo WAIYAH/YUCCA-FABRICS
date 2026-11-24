@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ params, locals, cookies }) => {
   const { booking, course } = data;
   const location = booking.meetingUrl ?? PLATFORM_LABELS[booking.platform];
   const body = icsEvent({
-    uid: `${booking.reference}@yuccafabrics`,
+    uid: `${booking.reference}@yuccahomeware.com`,
     start: booking.startsAt,
     end: new Date(booking.startsAt.getTime() + booking.hours * 3_600_000),
     summary: `${course.title} (Yucca Homeware Consultant)`,

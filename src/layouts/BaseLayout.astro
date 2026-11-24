@@ -24,11 +24,11 @@ interface Props {
   noindex?: boolean;
 }
 const {
-  title = 'Yucca Fabrics | Upholstery Fabrics & Interior Design in Nairobi',
-  description = 'Upholstery fabrics by the metre, furniture reupholstery, interior design consultations and virtual classes from Yucca Fabrics in Nairobi, Kenya.',
+  title = 'Yucca Homeware | Upholstery Fabrics & Interior Design in Nairobi',
+  description = 'Upholstery fabrics by the metre, furniture reupholstery, interior design consultations and virtual classes from Yucca Homeware in Nairobi, Kenya.',
   structuredData,
   image = '/images/fabrics/santa-boucle.jpeg',
-  imageAlt = 'Yucca Fabrics upholstery fabric',
+  imageAlt = 'Yucca Homeware upholstery fabric',
   type = 'website',
   noindex = false,
 } = Astro.props;
@@ -67,8 +67,8 @@ const { flash } = Astro.locals;
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
-    <link rel="icon" type="image/jpeg" href="/images/yucca-fabrics-logo.jpeg" />
-    <link rel="apple-touch-icon" href="/images/yucca-fabrics-logo.jpeg" />
+    <link rel="icon" type="image/jpeg" href="/images/yucca-homeware-logo.jpeg" />
+    <link rel="apple-touch-icon" href="/images/yucca-homeware-logo.jpeg" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
   </head>

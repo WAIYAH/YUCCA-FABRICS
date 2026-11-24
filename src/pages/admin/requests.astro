@@ -33,7 +33,7 @@ if (Astro.request.method === 'POST') {
   if (status !== item.status || amount !== null || (response && response !== item.adminResponse)) {
     Astro.locals.cfContext.waitUntil(sendEmail({
       to: item.email,
-      subject: amount !== null ? 'Your quote from Yucca Fabrics' : `Update on your service request: ${statusLabel(status)}`,
+      subject: amount !== null ? 'Your quote from Yucca Homeware' : `Update on your service request: ${statusLabel(status)}`,
       text: emailBody(`Hello ${item.name},`,
         amount !== null ? `Here is our quote for your project: ${formatMoney(amount)}, valid for 30 days.\n\n${details}` : `Your service request is now: ${statusLabel(status)}.`,
         response ?? '', 'Reply to this email to accept or ask any questions.'),

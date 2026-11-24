@@ -42,7 +42,7 @@ if (Astro.request.method === 'POST') {
   if (status !== order.status || paymentStatus !== order.paymentStatus) {
     Astro.locals.cfContext.waitUntil(sendEmail({
       to: order.email,
-      subject: `Update on your Yucca Fabrics order ${order.orderNumber}`,
+      subject: `Update on your Yucca Homeware order ${order.orderNumber}`,
       text: emailBody(`Hello ${order.customerName},`, `Your order ${order.orderNumber} is now: ${statusLabel(status)} (payment: ${statusLabel(paymentStatus)}).`, 'Reply to this email if you have any questions.'),
     }));
   }

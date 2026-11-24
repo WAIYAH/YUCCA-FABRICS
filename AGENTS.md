@@ -1,10 +1,10 @@
-# AGENTS.md — Yucca Fabrics
+# AGENTS.md — Yucca Homeware
 
 Instructions for AI coding agents working in this repository.
 
 ## Project
 
-Yucca Fabrics is an e-commerce site for upholstery fabrics, upholstery services, interior-design
+Yucca Homeware is an e-commerce site for upholstery fabrics, upholstery services, interior-design
 consultations and paid virtual classes (Kenya, prices in KES, times in Africa/Nairobi). Customers browse and
 buy fabrics, request services, book consultations and classes; staff manage everything from `/admin`.
 

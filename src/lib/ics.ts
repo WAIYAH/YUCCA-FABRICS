@@ -8,7 +8,7 @@ const fold = (line: string) => line.match(/.{1,73}/g)!.join('\r\n ');
 
 export function icsEvent(input: { uid: string; start: Date; end: Date; summary: string; description: string; location?: string; url?: string }): string {
   const lines = [
-    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Yucca Fabrics//Classes//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Yucca Homeware//Classes//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
     'BEGIN:VEVENT',
     `UID:${input.uid}`,
     `DTSTAMP:${stamp(new Date())}`,

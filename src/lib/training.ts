@@ -184,7 +184,7 @@ export async function createMeetingFor(booking: Booking, course: Course) {
   const { eventId, meetUrl } = await createMeetEvent({
     requestId: booking.reference,
     summary: `${course.title} · Yucca Homeware Consultant`,
-    description: `Virtual class booked on Yucca Fabrics (${booking.reference}).\n\nYour goals: ${booking.goals}`,
+    description: `Virtual class booked on Yucca Homeware (${booking.reference}).\n\nYour goals: ${booking.goals}`,
     start: booking.startsAt,
     end: new Date(booking.startsAt.getTime() + booking.hours * HOUR),
     attendeeEmail: booking.email,
@@ -227,7 +227,7 @@ export async function sendBookingEmail(booking: Booking, course: Course, kind: '
     ),
     attachments: [{
       disposition: 'attachment', filename: 'yucca-class.ics', type: 'text/calendar',
-      content: icsEvent({ uid: `${booking.reference}@yuccafabrics`, start: booking.startsAt, end, summary, description: join, location: booking.meetingUrl ?? platform, url: bookingUrl(booking.reference) }),
+      content: icsEvent({ uid: `${booking.reference}@yuccahomeware.com`, start: booking.startsAt, end, summary, description: join, location: booking.meetingUrl ?? platform, url: bookingUrl(booking.reference) }),
     }],
   });
 }
