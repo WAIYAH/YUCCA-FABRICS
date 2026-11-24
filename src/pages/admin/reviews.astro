@@ -11,9 +11,11 @@ if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const id = int(form, 'id');
   const intent = text(form, 'intent', 10);
-  if (!id) return done(Astro, 'error', 'Review not found.');
-  if (intent === 'delete') await db.delete(r).where(eq(r.id, id));
-  else if (intent === 'approved' || intent === 'rejected') await db.update(r).set({ status: intent }).where(eq(r.id, id));
+  if (intent !== 'delete' && intent !== 'approved' && intent !== 'rejected') return done(Astro, 'error', 'Choose approve, reject or delete.');
+  const changed = !id ? [] : intent === 'delete'
+    ? await db.delete(r).where(eq(r.id, id)).returning({ id: r.id })
+    : await db.update(r).set({ status: intent }).where(eq(r.id, id)).returning({ id: r.id });
+  if (changed.length === 0) return done(Astro, 'error', 'Review not found. It may already have been deleted.');
   return done(Astro, 'success', intent === 'delete' ? 'Review deleted.' : `Review ${intent}.`);
 }
 const reviews = await db.select({ review: r, product: schema.products.name, slug: schema.products.slug, author: schema.user.name })

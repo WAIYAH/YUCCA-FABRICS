@@ -38,4 +38,14 @@ export async function deleteUpload(url: string | null | undefined) {
   if (key && MEDIA_KEY.test(key)) await env.UPLOADS.delete(key);
 }
 
-export const MEDIA_KEY = /^[a-z]+\/[a-f0-9]{40}\.(jpg|png|webp)$/;
+/** Runs the database write for a just-uploaded image; if the write fails, deletes the image so R2 keeps no orphan. */
+export async function saveOrDiscard<T>(image: string | null, write: () => PromiseLike<T>): Promise<T> {
+  try {
+    return await write();
+  } catch (error) {
+    await deleteUpload(image);
+    throw error;
+  }
+}
+
+export const MEDIA_KEY =/^[a-z]+\/[a-f0-9]{40}\.(jpg|png|webp)$/;

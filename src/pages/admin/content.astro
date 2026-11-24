@@ -3,10 +3,10 @@ import { asc, desc, eq } from 'drizzle-orm';
 import StatusBadge from '~/components/StatusBadge.astro';
 import AdminLayout from '~/layouts/AdminLayout.astro';
 import { done, int, optionalText, text } from '~/lib/admin-form';
-import { db, schema } from '~/lib/db';
+import { constraintFailed, db, schema } from '~/lib/db';
 import { formatDate, slugify } from '~/lib/format';
 import { journalImage } from '~/lib/journal';
-import { deleteUpload, saveUploadedImage, UploadError } from '~/lib/uploads';
+import { deleteUpload, saveOrDiscard, saveUploadedImage, UploadError } from '~/lib/uploads';
 
 const b = schema.blogPosts;
 const g = schema.gallery;
@@ -41,12 +41,10 @@ if (Astro.request.method === 'POST') {
         publishedAt: status === 'published' ? existing?.publishedAt ?? new Date() : null,
         ...(image ? { image } : {}),
       } as const;
-      if (existing) {
-        await db.update(b).set(values).where(eq(b.id, existing.id));
-        if (image) await deleteUpload(existing.image);
-      } else {
-        await db.insert(b).values({ ...values, slug: slugify(title, true), authorId: Astro.locals.user!.id });
-      }
+      await saveOrDiscard(image, () => existing
+        ? db.update(b).set(values).where(eq(b.id, existing.id))
+        : db.insert(b).values({ ...values, slug: slugify(title, true), authorId: Astro.locals.user!.id }));
+      if (existing && image) await deleteUpload(existing.image);
       return done(Astro, 'success', existing ? 'Article saved.' : 'Article created.', '/admin/content');
     }
     if (intent === 'photo') {
@@ -55,16 +53,15 @@ if (Astro.request.method === 'POST') {
       const image = await upload('gallery');
       if (!title || (!existing && !image)) return done(Astro, 'error', 'A gallery photo needs a title and an image.');
       const values = { title, description: optionalText(form, 'description', 1000), categoryId: int(form, 'category_id'), ...(image ? { image } : {}) };
-      if (existing) {
-        await db.update(g).set(values).where(eq(g.id, existing.id));
-        if (image) await deleteUpload(existing.image);
-      } else {
-        await db.insert(g).values({ ...values, image: image! });
-      }
+      await saveOrDiscard(image, () => existing
+        ? db.update(g).set(values).where(eq(g.id, existing.id))
+        : db.insert(g).values({ ...values, image: image! }));
+      if (existing && image) await deleteUpload(existing.image);
       return done(Astro, 'success', existing ? 'Photo updated.' : 'Photo added.', '/admin/content?tab=gallery');
     }
   } catch (error) {
     if (error instanceof UploadError) return done(Astro, 'error', error.message);
+    if (constraintFailed(error, 'FOREIGN KEY')) return done(Astro, 'error', 'Choose a category from the list.');
     throw error;
   }
 }

@@ -54,26 +54,34 @@ if (Astro.request.method === 'POST') {
     case 'paid': {
       const payment = await latestPayment();
       if (!payment) return done(Astro, 'error', 'This booking has no payment record.');
+      if (payment.status === 'paid') return done(Astro, 'info', 'This booking is already paid.');
+      if (booking.status === 'cancelled') return done(Astro, 'error', 'A cancelled booking can’t be marked as paid.');
       await markPaid(payment, text(form, 'receipt', 80).toUpperCase() || null, waitUntil);
       return done(Astro, 'success', 'Payment recorded. The booking is confirmed if its time is still free.');
     }
     case 'complete':
+      if (booking.status !== 'confirmed') return done(Astro, 'error', 'Only a confirmed (paid) booking can be marked as completed.');
       await db.update(t).set({ status: 'completed' }).where(eq(t.id, booking.id));
       return done(Astro, 'success', 'Marked as completed.');
     case 'cancel':
+      if (booking.status === 'cancelled' || booking.status === 'completed') return done(Astro, 'error', `This booking is already ${booking.status}.`);
       await cancelBooking(booking);
       return done(Astro, 'success', 'Booking cancelled and its time released. Refund any payment separately.');
     case 'refunded': {
       const payment = await latestPayment();
-      if (payment) await db.update(schema.payments).set({ status: 'refunded' }).where(eq(schema.payments.id, payment.id));
+      if (payment?.status !== 'paid') return done(Astro, 'error', 'Only a paid payment can be marked as refunded.');
+      await db.update(schema.payments).set({ status: 'refunded' }).where(eq(schema.payments.id, payment.id));
       return done(Astro, 'success', 'Payment marked as refunded.');
     }
     case 'resend':
+      if (booking.status !== 'confirmed') return done(Astro, 'error', 'Only a confirmed booking has a confirmation to resend.');
       await sendBookingEmail(booking, course, 'confirmed');
       return done(Astro, 'success', 'Confirmation email sent again.');
     case 'notes':
       await db.update(t).set({ adminNotes: text(form, 'admin_notes', 5000) || null }).where(eq(t.id, booking.id));
       return done(Astro, 'success', 'Notes saved.');
+    default:
+      return done(Astro, 'error', 'That action isn’t available. Reload the page and try again.');
   }
 }
 

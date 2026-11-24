@@ -11,7 +11,9 @@ if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const id = int(form, 'id');
   const status = text(form, 'status', 10);
-  if (id && (status === 'new' || status === 'read' || status === 'replied')) await db.update(m).set({ status }).where(eq(m.id, id));
+  if (status !== 'new' && status !== 'read' && status !== 'replied') return done(Astro, 'error', 'Choose a valid status.');
+  const changed = id ? await db.update(m).set({ status }).where(eq(m.id, id)).returning({ id: m.id }) : [];
+  if (changed.length === 0) return done(Astro, 'error', 'Message not found.');
   return done(Astro, 'success', 'Message updated.');
 }
 const [messages, [subscribers]] = await db.batch([

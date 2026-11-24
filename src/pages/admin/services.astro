@@ -24,6 +24,7 @@ if (Astro.request.method === 'POST') {
     else await db.insert(s).values({ ...values, slug: slugify(name, true) });
   } catch (error) {
     if (constraintFailed(error, 'UNIQUE')) return done(Astro, 'error', 'A service with that name already exists.');
+    if (constraintFailed(error, 'FOREIGN KEY')) return done(Astro, 'error', 'Choose a category from the list.');
     throw error;
   }
   return done(Astro, 'success', id ? 'Service updated.' : 'Service added.', '/admin/services');

@@ -19,6 +19,8 @@ if (Astro.request.method === 'POST') {
   }
   const name = text(form, 'name', 120);
   if (!name) return done(Astro, 'error', 'Give the category a name.');
+  const [existing] = id ? await db.select().from(c).where(eq(c.id, id)) : [];
+  if (id && !existing) return done(Astro, 'error', 'Category not found. It may have been deleted.', '/admin/categories');
   let image: string | null;
   try {
     image = await saveUploadedImage(form.get('image') as File | null, 'categories');
@@ -28,14 +30,16 @@ if (Astro.request.method === 'POST') {
   }
   const values = { name, description: optionalText(form, 'description', 1000), isActive: checked(form, 'is_active'), ...(image ? { image } : {}) };
   try {
-    if (id) await db.update(c).set(values).where(eq(c.id, id));
+    if (existing) await db.update(c).set(values).where(eq(c.id, existing.id));
     else await db.insert(c).values({ ...values, slug: slugify(name, true) });
   } catch (error) {
     await deleteUpload(image);
     if (constraintFailed(error, 'UNIQUE')) return done(Astro, 'error', 'A category with that name already exists.');
     throw error;
   }
-  return done(Astro, 'success', id ? 'Category updated.' : 'Category added.', '/admin/categories');
+  // The new image replaced the old one, so the old file is no longer used.
+  if (existing && image) await deleteUpload(existing.image);
+  return done(Astro, 'success', existing ? 'Category updated.' : 'Category added.', '/admin/categories');
 }
 
 const categories = await db.select({ category: c, products: count(schema.products.id) }).from(c)

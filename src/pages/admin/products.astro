@@ -1,5 +1,5 @@
 ---
-import { asc, desc, eq } from 'drizzle-orm';
+import { asc, count, desc, eq } from 'drizzle-orm';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '~/data/fabric-collection';
 import AdminLayout from '~/layouts/AdminLayout.astro';
 import { cents, checked, done, int, optionalText, text } from '~/lib/admin-form';
@@ -17,13 +17,17 @@ if (Astro.request.method === 'POST') {
   const [existing] = id ? await db.select().from(p).where(eq(p.id, id)) : [];
 
   if (intent === 'delete' && existing) {
-    try {
-      await db.delete(p).where(eq(p.id, existing.id));
-    } catch (error) {
-      if (constraintFailed(error)) return done(Astro, 'error', 'This product has reviews or orders linked to it. Hide it instead of deleting.');
-      throw error;
+    // Deleting would cascade away customer reviews and unlink order history, so only unused products can go.
+    const [[reviews], [ordered]] = await db.batch([
+      db.select({ n: count() }).from(schema.productReviews).where(eq(schema.productReviews.productId, existing.id)),
+      db.select({ n: count() }).from(schema.orderItems).where(eq(schema.orderItems.productId, existing.id)),
+    ]);
+    if ((reviews?.n ?? 0) > 0 || (ordered?.n ?? 0) > 0) {
+      return done(Astro, 'error', `${existing.name} has customer reviews or orders, so it can’t be deleted. Use “Hide” to remove it from the shop and keep its history.`);
     }
-    await deleteUpload(existing.image);
+    const photos = await db.select({ image: schema.productImages.image }).from(schema.productImages).where(eq(schema.productImages.productId, existing.id));
+    await db.delete(p).where(eq(p.id, existing.id));
+    await Promise.all([existing.image, ...photos.map((photo) => photo.image)].map(deleteUpload));
     return done(Astro, 'success', 'Product deleted.', '/admin/products');
   }
   if (intent === 'toggle' && existing) {
@@ -58,6 +62,7 @@ if (Astro.request.method === 'POST') {
   } catch (error) {
     await deleteUpload(image);
     if (constraintFailed(error, 'UNIQUE')) return done(Astro, 'error', 'That SKU is already in use.');
+    if (constraintFailed(error, 'FOREIGN KEY')) return done(Astro, 'error', 'Choose a category from the list.');
     throw error;
   }
   if (existing && image) await deleteUpload(existing.image);
@@ -109,7 +114,7 @@ const [edit] = editId ? await db.select().from(p).where(eq(p.id, editId)) : [];
             <td class="py-3"><span class="flex justify-end gap-3">
               <a class="underline" href={`?edit=${product.id}#product-form`}>Edit</a>
               <form method="post"><input type="hidden" name="intent" value="toggle" /><input type="hidden" name="id" value={product.id} /><button class="underline">{product.isActive ? 'Hide' : 'Show'}</button></form>
-              <form method="post" data-confirm={`Delete ${product.name}? This can’t be undone.`}><input type="hidden" name="intent" value="delete" /><input type="hidden" name="id" value={product.id} /><button class="text-[#7A2E22] underline">Delete</button></form>
+              <form method="post" data-confirm={`Delete ${product.name}? This can’t be undone. (Products with reviews or orders can only be hidden.)`}><input type="hidden" name="intent" value="delete" /><input type="hidden" name="id" value={product.id} /><button class="text-[#7A2E22] underline">Delete</button></form>
             </span></td>
           </tr>
         ))}
