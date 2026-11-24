@@ -4,6 +4,11 @@
   "compatibility_date": "2026-11-17",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // Cloudflare creates the DNS records and certificates; the middleware redirects www to the bare domain.
+  "routes": [
+    { "pattern": "yuccahomeware.com", "custom_domain": true },
+    { "pattern": "www.yuccahomeware.com", "custom_domain": true }
+  ],
   "vars": {
     "SITE_URL": "https://yuccahomeware.com",
     "TAX_RATE": "0.16",
