@@ -82,7 +82,7 @@ const editPhoto = tab === 'gallery' ? photos.find((photo) => photo.id === editId
     <a href="/admin/content?tab=gallery" class:list={['rounded-full px-4 py-2 text-sm font-semibold', tab === 'gallery' ? 'bg-forest text-white' : 'bg-white ring-1 ring-ink/10']} aria-current={tab === 'gallery' ? 'page' : undefined}>Gallery</a>
   </nav>
   {tab === 'journal' ? (
-    <div class="grid gap-6 xl:grid-cols-[1.1fr_.9fr]">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_.9fr]">
       <form method="post" enctype="multipart/form-data" class="grid h-fit gap-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5" id="post-form">
         <h2 class="font-serif text-2xl">{editPost ? 'Edit article' : 'New article'}</h2>
         <input type="hidden" name="intent" value="post" />
@@ -97,7 +97,7 @@ const editPhoto = tab === 'gallery' ? photos.find((photo) => photo.id === editId
         <label class="text-sm">Cover photo{editPost?.image && ' (leave empty to keep the current one)'}<input class="form-control mt-1 text-sm" name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
         <div class="flex gap-4"><button class="btn-primary">{editPost ? 'Save article' : 'Create article'}</button>{editPost && <a class="self-center text-sm underline" href="/admin/content">Cancel</a>}</div>
       </form>
-      <section class="grid h-fit gap-3">
+      <section class="grid h-fit grid-cols-1 gap-3">
         {posts.map((post) => (
           <article class="flex gap-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-ink/5">
             <img src={journalImage(post.image)} alt="" class="h-16 w-16 shrink-0 rounded-xl object-cover" loading="lazy" />
@@ -107,7 +107,7 @@ const editPhoto = tab === 'gallery' ? photos.find((photo) => photo.id === editId
       </section>
     </div>
   ) : (
-    <div class="grid gap-6 xl:grid-cols-[.8fr_1.2fr]">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[.8fr_1.2fr]">
       <form method="post" enctype="multipart/form-data" class="grid h-fit gap-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
         <h2 class="font-serif text-2xl">{editPhoto ? 'Edit photo' : 'Add a project photo'}</h2>
         <input type="hidden" name="intent" value="photo" />

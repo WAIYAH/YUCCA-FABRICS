@@ -48,15 +48,18 @@ const monthLabel = (ym: string) => new Date(`${ym}-15T12:00:00Z`).toLocaleDateSt
   </div>
 
   <div class="mt-8 grid gap-6 xl:grid-cols-[1.3fr_.7fr]">
-    <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
+    <!-- The chart grows to fill the card when "Next classes" beside it is taller, so bar heights are percentages. -->
+    <section class="flex flex-col rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
       <h2 class="font-serif text-2xl">Paid revenue, last 6 months</h2>
       {monthly.length === 0 ? <p class="mt-4 text-sm text-gray-600">No paid payments yet.</p> : (
         <>
-          <div class="mt-6 flex h-48 items-end gap-4" role="img" aria-label={monthly.map((m) => `${monthLabel(m.month)}: orders ${formatMoneyWhole(Number(m.orders))}, classes ${formatMoneyWhole(Number(m.classes))}`).join('; ')}>
+          <div class="mt-6 flex min-h-48 flex-1 gap-4" role="img" aria-label={monthly.map((m) => `${monthLabel(m.month)}: orders ${formatMoneyWhole(Number(m.orders))}, classes ${formatMoneyWhole(Number(m.classes))}`).join('; ')}>
             {monthly.map((m) => (
               <div class="flex flex-1 flex-col items-center gap-2">
-                <div class="flex w-full max-w-14 flex-col justify-end overflow-hidden rounded-t-xl" style={`height:${Math.max(4, ((Number(m.orders) + Number(m.classes)) / peak) * 160)}px`}>
-                  <span class="block bg-clay" style={`flex:${Number(m.classes)}`}></span><span class="block bg-forest" style={`flex:${Number(m.orders)}`}></span>
+                <div class="flex w-full flex-1 items-end justify-center">
+                  <div class="flex w-full max-w-14 flex-col justify-end overflow-hidden rounded-t-xl" style={`height:${Math.max(3, ((Number(m.orders) + Number(m.classes)) / peak) * 100)}%`}>
+                    <span class="block bg-clay" style={`flex:${Number(m.classes)}`}></span><span class="block bg-forest" style={`flex:${Number(m.orders)}`}></span>
+                  </div>
                 </div>
                 <span class="text-xs text-gray-500">{monthLabel(m.month)}</span>
               </div>
@@ -78,8 +81,8 @@ const monthLabel = (ym: string) => new Date(`${ym}-15T12:00:00Z`).toLocaleDateSt
     <section class="overflow-x-auto rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
       <div class="flex items-center justify-between"><h2 class="font-serif text-2xl">Latest orders</h2><a href="/admin/orders" class="text-sm font-semibold text-forest">All orders</a></div>
       <table class="mt-4 w-full min-w-[560px] text-left text-sm">
-        <thead class="text-xs uppercase tracking-wider text-gray-500"><tr><th class="py-2">Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Payment</th></tr></thead>
-        <tbody>{latest.map((order) => <tr class="border-t border-ink/5"><td class="py-3"><a class="font-semibold underline" href={`/admin/orders?q=${order.orderNumber}`}>{order.orderNumber}</a><br /><span class="text-xs text-gray-500">{formatDate(order.createdAt)}</span></td><td>{order.customerName}</td><td>{formatMoney(order.totalCents)}</td><td><StatusBadge status={order.status} /></td><td><StatusBadge status={order.paymentStatus} /></td></tr>)}</tbody>
+        <thead class="text-xs uppercase tracking-wider text-gray-500"><tr><th class="py-2 pr-4">Order</th><th class="pr-4">Customer</th><th class="pr-4">Total</th><th class="pr-4">Status</th><th>Payment</th></tr></thead>
+        <tbody>{latest.map((order) => <tr class="border-t border-ink/5"><td class="py-3 pr-4"><a class="font-semibold underline" href={`/admin/orders?q=${order.orderNumber}`}>{order.orderNumber}</a><br /><span class="text-xs text-gray-500">{formatDate(order.createdAt)}</span></td><td class="pr-4">{order.customerName}</td><td class="whitespace-nowrap pr-4">{formatMoney(order.totalCents)}</td><td class="pr-4"><StatusBadge status={order.status} /></td><td><StatusBadge status={order.paymentStatus} /></td></tr>)}</tbody>
       </table>
     </section>
     <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
