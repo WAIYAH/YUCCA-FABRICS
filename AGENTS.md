@@ -22,7 +22,7 @@ read-only reference: never edit it or import from it.
 - Tailwind CSS 4 via `@tailwindcss/vite`. The theme is the `@theme` block in `src/styles/global.css`.
   Colours come from the logo: `forest` #3F5320 (primary), `olive` #5B7029, `sage` #576829 (small labels),
   `clay` #8C5530 (wood-brown accent), `wheat` #E4C59A (accent on dark), `sand` #F7F4EE (page),
-  `cream` #EFEADF (alternate sections), `ink` #2A2B25 (text), `night` #252E16 (top bar and footer), plus card
+  `cream` #EFEADF (alternate sections), `ink` #2A2B25 (text), `night` #252E16 (footer and dark sections), plus card
   accents `pine`, `teal`, `terracotta`, `mustard` and a warm `gray-*` scale. Use these tokens, not raw hex
   values, and keep text at WCAG AA contrast (use `wheat` for text on `night`/`forest`; white text fails on
   `mustard`). Fonts are self-hosted with `@fontsource`: Inter (body) and Poppins (`font-serif`, headings).

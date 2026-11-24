@@ -11,7 +11,7 @@
   --color-sand: #f7f4ee; /* page background */
   --color-cream: #efeadf; /* alternate section background */
   --color-ink: #2a2b25; /* body text */
-  --color-night: #252e16; /* footer and top bar */
+  --color-night: #252e16; /* footer and dark sections */
 
   /* Accent colours for service and course cards (white text passes AA on all but mustard). */
   --color-pine: #1f5b43;

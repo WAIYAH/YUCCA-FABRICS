@@ -1,7 +1,6 @@
 ---
 import Icon from './Icon.astro';
 import { cartCount } from '~/lib/cart';
-import { DEFAULT_ADDRESS, DEFAULT_EMAIL, DEFAULT_PHONE, getSettings, setting, telHref } from '~/lib/settings';
 
 // Navigation is defined once here and rendered for both desktop and mobile.
 interface NavLink { href: string; label: string; match?: string[] }
@@ -30,20 +29,8 @@ const isActive = (link: { href?: string; match?: string[] }) =>
 const { user } = Astro.locals;
 const isCustomer = user?.role === 'customer';
 const accountUrl = user ? (user.role === 'admin' ? '/admin' : '/account') : '/auth/login';
-const settings = await getSettings(Astro.locals);
-const phone = setting(settings, 'business_phone', DEFAULT_PHONE);
-const email = setting(settings, 'business_email', DEFAULT_EMAIL);
 const bagCount = await cartCount(Astro);
 ---
-<div class="bg-night text-[11px] tracking-wide text-cream/80">
-  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-2">
-    <p class="truncate"><Icon name="fa6-solid:location-dot" class="mr-1.5 inline text-wheat" />{setting(settings, 'business_address', DEFAULT_ADDRESS)}<span class="hidden sm:inline"> · Fabrics, upholstery &amp; interiors</span></p>
-    <div class="flex shrink-0 items-center gap-4">
-      <a class="hover:text-wheat" href={telHref(phone)}><Icon name="fa6-solid:phone" class="mr-1.5 inline text-wheat" />{phone}</a>
-      <a class="hidden hover:text-wheat md:inline" href={`mailto:${email}`}><Icon name="fa6-regular:envelope" class="mr-1.5 inline text-wheat" />{email}</a>
-    </div>
-  </div>
-</div>
 <header id="site-header" class="site-header sticky top-0 z-40 border-b border-ink/10 bg-sand/95 backdrop-blur supports-[backdrop-filter]:bg-sand/85">
   <div class="mx-auto flex max-w-7xl items-center gap-4 px-5 py-3 lg:gap-6">
     <a href="/" aria-label="Yucca Homeware home" class="flex shrink-0 items-center gap-3">
