@@ -1,6 +1,7 @@
 import type { AstroCookies } from 'astro';
 import { and, eq, sum } from 'drizzle-orm';
 import { db, runBatch, schema } from '~/lib/db';
+import { hasPrice } from '~/lib/money';
 
 const COOKIE = 'yf_cart';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -68,7 +69,8 @@ export async function cartLines(cartId: string | null): Promise<CartLine[]> {
     .innerJoin(p, eq(p.id, schema.cartItems.productId))
     .where(and(eq(schema.cartItems.cartId, cartId), eq(p.isActive, true)))
     .orderBy(p.name);
-  return rows.filter((row) => row.stock > 0).map((row) => {
+  // Fabrics without a price yet can't be bought online, even if they were added before the price was removed.
+  return rows.filter((row) => row.stock > 0 && hasPrice(row.priceCents)).map((row) => {
     const quantity = Math.max(1, Math.min(row.quantity, row.stock));
     const unitPriceCents = row.salePriceCents ?? row.priceCents;
     return { ...row, quantity, unitPriceCents, lineTotalCents: unitPriceCents * quantity };
@@ -82,9 +84,10 @@ export class CartError extends Error {
 }
 
 async function activeProduct(productId: number) {
-  const [product] = await db.select({ id: schema.products.id, name: schema.products.name, stock: schema.products.stock })
+  const [product] = await db.select({ id: schema.products.id, name: schema.products.name, stock: schema.products.stock, priceCents: schema.products.priceCents })
     .from(schema.products).where(and(eq(schema.products.id, productId), eq(schema.products.isActive, true)));
   if (!product) throw new CartError('That fabric is no longer available.', 404);
+  if (!hasPrice(product.priceCents)) throw new CartError(`Please ask us for the price of ${product.name}; it can’t be ordered online yet.`, 409);
   return product;
 }
 

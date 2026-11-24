@@ -3,6 +3,9 @@
 const twoDecimals = new Intl.NumberFormat('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const whole = new Intl.NumberFormat('en-KE', { maximumFractionDigits: 0 });
 
+/** A product price of 0 means the admin hasn't set one yet: show "Price on request" and don't sell it online. */
+export const hasPrice = (priceCents: number) => priceCents > 0;
+
 /** "KES 1,850.00" */
 export const formatMoney = (cents: number) => `KES ${twoDecimals.format(cents / 100)}`;
 

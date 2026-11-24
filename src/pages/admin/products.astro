@@ -6,7 +6,7 @@ import { cents, checked, done, int, optionalText, text } from '~/lib/admin-form'
 import { contains } from '~/lib/catalogue';
 import { constraintFailed, db, schema } from '~/lib/db';
 import { slugify } from '~/lib/format';
-import { centsToInput, formatMoney } from '~/lib/money';
+import { centsToInput, formatMoney, hasPrice } from '~/lib/money';
 import { deleteUpload, saveUploadedImage, UploadError } from '~/lib/uploads';
 
 const p = schema.products;
@@ -81,7 +81,7 @@ const [edit] = editId ? await db.select().from(p).where(eq(p.id, editId)) : [];
       <label class="text-sm">Product name<input class="form-control mt-1" name="name" required maxlength="180" value={edit?.name ?? ''} /></label>
       <label class="text-sm">SKU<input class="form-control mt-1 uppercase" name="sku" required maxlength="80" value={edit?.sku ?? ''} /></label>
       <label class="text-sm">Category<select class="form-control mt-1" name="category_id"><option value="">Uncategorised</option>{categories.map((cat) => <option value={cat.id} selected={edit?.categoryId === cat.id}>{cat.name}</option>)}</select></label>
-      <label class="text-sm">Price (KES)<input class="form-control mt-1" name="price" inputmode="decimal" required value={centsToInput(edit?.priceCents)} /></label>
+      <label class="text-sm">Price (KES)<input class="form-control mt-1" name="price" inputmode="decimal" required value={centsToInput(edit?.priceCents)} aria-describedby="price-hint" /><span id="price-hint" class="mt-1 block text-xs text-gray-500">Enter 0 to show “Price on request” until you have a price.</span></label>
       <label class="text-sm">Sale price (optional)<input class="form-control mt-1" name="sale_price" inputmode="decimal" value={centsToInput(edit?.salePriceCents)} /></label>
       <label class="text-sm">Stock<input class="form-control mt-1" name="stock" type="number" min="0" required value={edit?.stock ?? 0} /></label>
       <label class="text-sm">Unit<input class="form-control mt-1" name="unit" maxlength="30" value={edit?.unit ?? 'metre'} /></label>
@@ -103,7 +103,7 @@ const [edit] = editId ? await db.select().from(p).where(eq(p.id, editId)) : [];
           <tr class="border-t border-ink/5">
             <td class="py-3"><span class="flex items-center gap-3"><img src={product.image ?? PRODUCT_PLACEHOLDER_IMAGE} alt="" class="h-12 w-12 rounded-lg object-cover object-top" loading="lazy" /><span><strong>{product.name}</strong><br /><span class="text-xs text-gray-500">{product.sku}</span></span></span></td>
             <td>{category ?? '—'}</td>
-            <td>{product.salePriceCents !== null ? <><span class="text-clay">{formatMoney(product.salePriceCents)}</span> <s class="text-xs text-gray-500">{formatMoney(product.priceCents)}</s></> : formatMoney(product.priceCents)}</td>
+            <td>{!hasPrice(product.priceCents) ? <span class="text-gray-500">Not set</span> : product.salePriceCents !== null ? <><span class="text-clay">{formatMoney(product.salePriceCents)}</span> <s class="text-xs text-gray-500">{formatMoney(product.priceCents)}</s></> : formatMoney(product.priceCents)}</td>
             <td class:list={[{ 'font-semibold text-clay': product.stock <= 5 }]}>{product.stock}</td>
             <td>{product.isActive ? 'Shown' : 'Hidden'}{product.isFeatured && ' · Featured'}</td>
             <td class="py-3"><span class="flex justify-end gap-3">

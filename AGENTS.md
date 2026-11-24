@@ -56,7 +56,7 @@ read-only reference: never edit it or import from it.
 2. Copy `.dev.vars.example` to `.dev.vars` and fill it in (at least `BETTER_AUTH_SECRET`). Never commit `.dev.vars`.
    Non-secret settings (`SITE_URL`, `TAX_RATE`, `DELIVERY_FEE`, `MPESA_ENV`, `EMAIL_FROM`) are `vars` in `wrangler.jsonc`.
 3. `pnpm db:migrate:local` creates the local D1 database (Miniflare, stored in `.wrangler/`).
-4. `pnpm db:seed:local` adds categories, the 18-fabric catalogue (placeholder prices), services, the starter
+4. `pnpm db:seed:local` adds categories, the 18-fabric catalogue (no prices yet: a price of 0 shows "Price on request" and the fabric can't be added to the bag), services, the starter
    journal, the 7 virtual courses and default settings. Every insert is `INSERT OR IGNORE` on a unique slug/key,
    so it is safe to re-run and never overwrites admin edits. `seed/` is generated and gitignored.
 5. `pnpm dev` and open http://localhost:4321.

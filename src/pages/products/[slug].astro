@@ -8,9 +8,10 @@ import { PRODUCT_PLACEHOLDER_IMAGE } from '~/data/fabric-collection';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { productBySlug, relatedProducts } from '~/lib/catalogue';
 import { db, schema } from '~/lib/db';
-import { formatMoney } from '~/lib/money';
+import { formatMoney, hasPrice } from '~/lib/money';
 import { deliveryFeeCents } from '~/lib/pricing';
 import { absoluteUrl, breadcrumbJsonLd, BUSINESS_NAME, businessId, metaDescription, siteOrigin } from '~/lib/seo';
+import { getSettings, whatsappUrl } from '~/lib/settings';
 
 const product = await productBySlug(Astro.params.slug ?? '');
 if (!product) return Astro.rewrite('/404');
@@ -33,7 +34,9 @@ const [images, related, reviews, eligible, [reviewTotal]] = await Promise.all([
 const reviewCount = reviewTotal?.n ?? 0;
 const canReview = eligible.length > 0;
 const mainImage = product.image ?? PRODUCT_PLACEHOLDER_IMAGE;
+const priced = hasPrice(product.priceCents);
 const priceCents = product.salePriceCents ?? product.priceCents;
+const settings = await getSettings(Astro.locals);
 const origin = siteOrigin(Astro.url);
 const url = absoluteUrl(`/products/${product.slug}`, origin);
 const deliveryFee = deliveryFeeCents();
@@ -52,14 +55,15 @@ const structuredData = [{
     author: { '@type': 'Person', name: review.name }, datePublished: review.createdAt.toISOString().slice(0, 10),
     name: review.title ?? undefined, reviewBody: review.review,
   })),
-  offers: {
+  // No offer until the admin sets a price: a KES 0 offer would tell search engines the fabric is free.
+  offers: !priced ? undefined : {
     '@type': 'Offer', priceCurrency: 'KES', price: (priceCents / 100).toFixed(2), url, itemCondition: 'https://schema.org/NewCondition',
     availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     seller: { '@id': businessId(origin) }, areaServed: { '@type': 'Country', name: 'Kenya' },
   },
 }, breadcrumbJsonLd(origin, [['Shop', '/shop'], [product.name, `/products/${product.slug}`]])];
 const pageTitle = `${product.name} Upholstery Fabric, Nairobi | ${BUSINESS_NAME}`;
-const pageDescription = metaDescription(`${formatMoney(priceCents)} per ${product.unit}. ${product.description} Delivered in Nairobi and across Kenya.`);
+const pageDescription = metaDescription(`${priced ? `${formatMoney(priceCents)} per ${product.unit}. ` : ''}${product.description} Delivered in Nairobi and across Kenya.`);
 const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'Africa/Nairobi' });
 const consultationHref = `/consultations?type=${encodeURIComponent('Fabric and colour selection')}#book`;
 ---
@@ -94,7 +98,12 @@ const consultationHref = `/consultations?type=${encodeURIComponent('Fabric and c
           <dt class="text-gray-500">Material</dt><dd>{product.material || 'See description'}</dd>
           <dt class="text-gray-500">Availability</dt><dd>{product.stock > 0 ? `In stock · ${product.stock} ${product.unit}${product.stock === 1 ? '' : 's'}` : 'Currently unavailable'}</dd>
         </dl>
-        {product.stock > 0 && (
+        {!priced ? (
+          <div class="mt-7">
+            <a href={whatsappUrl(settings, `Hello Yucca Homeware, what is the price of ${product.name} (${product.sku})?`)} target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-full bg-forest px-7 py-3 text-sm font-semibold text-white transition hover:bg-olive"><Icon name="fa6-brands:whatsapp" />Ask for the price on WhatsApp<span class="sr-only"> (opens in a new tab)</span></a>
+            <p class="mt-3 text-xs text-gray-500">We’re finalising prices for this fabric. Message us for today’s price per {product.unit} or to order.</p>
+          </div>
+        ) : product.stock > 0 && (
           <form method="post" action={actions.cartAdd} data-ajax-form="cartAdd" data-keep class="mt-7 flex flex-wrap items-center gap-3">
             <input type="hidden" name="product_id" value={product.id} />
             <label class="text-sm" for="quantity">Quantity ({product.unit}s)</label>

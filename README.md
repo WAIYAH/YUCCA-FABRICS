@@ -88,7 +88,7 @@ node scripts/seed.ts; pnpm wrangler d1 execute yucca-db --remote --file=seed/see
 pnpm make-admin you@example.com --remote
 ```
 
-Then replace the placeholder fabric prices and business details in `/admin`.
+Then enter the fabric prices (seeded as 0, shown as "Price on request") and the business details in `/admin`.
 
 ## Project structure
 

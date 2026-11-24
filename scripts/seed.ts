@@ -34,7 +34,6 @@ const shopCategories = [
 for (const [name, slug, description] of shopCategories) statements.push(insert('categories', { name, slug, description }));
 
 /* Fabric catalogue. Placeholder prices (KES per metre) by type: replace them in Admin → Products. */
-const placeholderPrices: Record<string, number> = { Linen: 1850, 'Bouclé': 2400, Velvet: 2600, 'Linen & velvet': 2600, Fur: 2800, 'Inverted leather': 3200 };
 const featured = new Set(['santa-boucle.jpeg', 'bella-fur.jpeg', 'coco-boucle.jpeg', 'harmony-linen.jpeg']);
 const fabricDetails: Record<string, [colour: string, description: string]> = {
   'santa-boucle.jpeg': ['Charcoal & ivory', 'A herringbone bouclé in charcoal and ivory with a soft, nubby handle. Pictured on a sectional sofa and lounge chair; a striking choice for statement chairs, sofas and cushions.'],
@@ -61,15 +60,15 @@ const upholsteryCategory = { sql: "(SELECT id FROM categories WHERE slug = 'upho
 const titleCase = (s: string) => s.replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase());
 fabricCollection.forEach((fabric, index) => {
   const details = fabricDetails[fabric.image];
-  const price = placeholderPrices[fabric.type];
-  if (!details || price === undefined) throw new Error(`No product details for ${fabric.image}`);
+  if (!details) throw new Error(`No product details for ${fabric.image}`);
   statements.push(insert('products', {
     category_id: upholsteryCategory,
     name: `${fabric.name} ${titleCase(fabric.type)}`,
     slug: fabric.image.replace(/\.[a-z]+$/, ''),
     sku: `YF-${2001 + index}`,
     description: `${details[1]} Sold by the metre; ask us for a swatch or a quote to upholster your piece.`,
-    price_cents: cents(price),
+    // 0 = price not set yet: the shop shows "Price on request" until the admin enters one.
+    price_cents: 0,
     stock: 40,
     unit: 'metre',
     colour: details[0],
@@ -81,7 +80,7 @@ fabricCollection.forEach((fabric, index) => {
 statements.push(insert('products', {
   category_id: upholsteryCategory, name: 'Terracotta Weave', slug: 'terracotta-weave', sku: 'YF-1002',
   description: 'A richly textured woven upholstery cloth that brings warmth to a favourite armchair.',
-  price_cents: cents(2200), stock: 68, unit: 'metre', colour: 'Terracotta', material: 'Cotton blend',
+  price_cents: 0, stock: 68, unit: 'metre', colour: 'Terracotta', material: 'Cotton blend',
   image: fabricImage('rust-tweed-texture.jpeg'), is_featured: true,
 }));
 

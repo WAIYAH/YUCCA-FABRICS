@@ -17,7 +17,7 @@ import { DEFAULT_ADDRESS, DEFAULT_PHONE, getSettings, setting, telHref, whatsapp
 
 const [services, [fabrics]] = await Promise.all([
   activeServices(),
-  db.select({ n: count(), from: min(sql<number>`coalesce(${schema.products.salePriceCents}, ${schema.products.priceCents})`) })
+  db.select({ n: count(), from: min(sql<number>`nullif(coalesce(${schema.products.salePriceCents}, ${schema.products.priceCents}), 0)`) })
     .from(schema.products).where(eq(schema.products.isActive, true)),
 ]);
 const requestServices = services.filter((service) => !isConsultationService(service));

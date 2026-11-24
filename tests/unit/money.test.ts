@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { couponDiscount } from '~/lib/coupons';
-import { centsToInput, formatMoney, formatMoneyWhole, parseKes, taxOn } from '~/lib/money';
+import { centsToInput, formatMoney, formatMoneyWhole, hasPrice, parseKes, taxOn } from '~/lib/money';
 import { orderTotals } from '~/lib/pricing';
 
 describe('money', () => {
@@ -47,5 +47,13 @@ describe('coupon discount', () => {
   it('never discounts more than the subtotal', () => {
     expect(couponDiscount({ discountType: 'fixed', discountValue: 500000 }, 480000)).toBe(480000);
     expect(couponDiscount({ discountType: 'percent', discountValue: 150 }, 1000)).toBe(1000);
+  });
+});
+
+describe('hasPrice', () => {
+  it('treats 0 as "price not set yet" and any positive amount as a price', () => {
+    expect(hasPrice(0)).toBe(false);
+    expect(hasPrice(parseKes('0')!)).toBe(false);
+    expect(hasPrice(185000)).toBe(true);
   });
 });
