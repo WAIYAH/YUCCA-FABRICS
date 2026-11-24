@@ -1,5 +1,4 @@
 ---
-import { env } from 'cloudflare:workers';
 import BookingForm from '~/components/BookingForm.astro';
 import CourseCard from '~/components/CourseCard.astro';
 import Icon from '~/components/Icon.astro';
@@ -8,6 +7,7 @@ import { BOOKING_GUIDELINES, courseLook, LEVEL_LABELS, tracks } from '~/data/cou
 import { serviceImage } from '~/data/service-details';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { formatMoneyWhole } from '~/lib/money';
+import { absoluteUrl, breadcrumbJsonLd, businessId, siteOrigin } from '~/lib/seo';
 import { activeCourses } from '~/lib/training';
 
 const courses = await activeCourses();
@@ -16,14 +16,15 @@ if (!course) return Astro.rewrite('/404');
 const track = tracks[course.track];
 const look = courseLook(course.slug);
 const others = [...courses.filter((c) => c.id !== course.id && c.track === course.track), ...courses.filter((c) => c.track !== course.track)].slice(0, 3);
-const url = new URL(`/classes/${course.slug}`, env.SITE_URL || Astro.url.origin).toString();
-const structuredData = {
-  '@context': 'https://schema.org', '@type': 'Course', name: course.title, description: course.summary, url,
+const origin = siteOrigin(Astro.url);
+const url = absoluteUrl(`/classes/${course.slug}`, origin);
+const structuredData = [{
+  '@context': 'https://schema.org', '@type': 'Course', name: course.title, description: course.summary, url, inLanguage: 'en',
   teaches: course.outcomes, educationalLevel: course.level,
-  provider: { '@type': 'Organization', name: 'Yucca Homeware Consultant', sameAs: env.SITE_URL || Astro.url.origin },
+  provider: { '@type': 'Organization', name: 'Yucca Homeware Consultant', url: absoluteUrl('/', origin), parentOrganization: { '@id': businessId(origin) } },
   offers: { '@type': 'Offer', category: 'Paid', price: (course.hourlyRateCents / 100).toFixed(0), priceCurrency: 'KES', url: `${url}#book` },
   hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'online', courseWorkload: 'PT1H' },
-};
+}, breadcrumbJsonLd(origin, [['Virtual classes', '/classes'], [course.title, `/classes/${course.slug}`]])];
 ---
 <BaseLayout title={`${course.title} · virtual class | Yucca Fabrics`} description={`${course.summary} Live online, ${formatMoneyWhole(course.hourlyRateCents)} per hour.`} image={serviceImage(look.image)} structuredData={structuredData}>
   <section class="relative overflow-hidden text-white" style={`background-color:${track.bg}`}>

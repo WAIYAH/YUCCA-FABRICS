@@ -1,7 +1,6 @@
 ---
-import { env } from 'cloudflare:workers';
 import { actions } from 'astro:actions';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq } from 'drizzle-orm';
 import Icon from '~/components/Icon.astro';
 import Price from '~/components/Price.astro';
 import ProductCard from '~/components/ProductCard.astro';
@@ -10,12 +9,14 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 import { productBySlug, relatedProducts } from '~/lib/catalogue';
 import { db, schema } from '~/lib/db';
 import { formatMoney } from '~/lib/money';
+import { deliveryFeeCents } from '~/lib/pricing';
+import { absoluteUrl, breadcrumbJsonLd, BUSINESS_NAME, businessId, metaDescription, siteOrigin } from '~/lib/seo';
 
 const product = await productBySlug(Astro.params.slug ?? '');
 if (!product) return Astro.rewrite('/404');
 
 const user = Astro.locals.user;
-const [images, related, reviews, eligible] = await Promise.all([
+const [images, related, reviews, eligible, [reviewTotal]] = await Promise.all([
   db.select().from(schema.productImages).where(eq(schema.productImages.productId, product.id)).orderBy(asc(schema.productImages.sortOrder), asc(schema.productImages.id)),
   relatedProducts(product.categoryId, product.id),
   db.select({ rating: schema.productReviews.rating, title: schema.productReviews.title, review: schema.productReviews.review, createdAt: schema.productReviews.createdAt, name: schema.user.name })
@@ -26,22 +27,43 @@ const [images, related, reviews, eligible] = await Promise.all([
     ? db.select({ id: schema.orders.id }).from(schema.orders).innerJoin(schema.orderItems, eq(schema.orderItems.orderId, schema.orders.id))
       .where(and(eq(schema.orders.userId, user.id), eq(schema.orderItems.productId, product.id), eq(schema.orders.status, 'delivered'))).limit(1)
     : Promise.resolve([]),
+  db.select({ n: count() }).from(schema.productReviews)
+    .where(and(eq(schema.productReviews.productId, product.id), eq(schema.productReviews.status, 'approved'))),
 ]);
+const reviewCount = reviewTotal?.n ?? 0;
 const canReview = eligible.length > 0;
 const mainImage = product.image ?? PRODUCT_PLACEHOLDER_IMAGE;
 const priceCents = product.salePriceCents ?? product.priceCents;
-const url = new URL(`/products/${product.slug}`, env.SITE_URL || Astro.url.origin).toString();
-const structuredData = {
+const origin = siteOrigin(Astro.url);
+const url = absoluteUrl(`/products/${product.slug}`, origin);
+const deliveryFee = deliveryFeeCents();
+// Ratings come only from approved reviews of this product, never from the business itself.
+const rating = reviewCount > 0 && product.averageRating !== null
+  ? { '@type': 'AggregateRating', ratingValue: Number(product.averageRating).toFixed(1), reviewCount, bestRating: 5, worstRating: 1 }
+  : undefined;
+const structuredData = [{
   '@context': 'https://schema.org', '@type': 'Product', name: product.name, description: product.description, sku: product.sku,
-  image: new URL(mainImage, url).toString(), material: product.material ?? undefined, color: product.colour ?? undefined,
-  offers: { '@type': 'Offer', priceCurrency: 'KES', price: (priceCents / 100).toFixed(2), url,
-    availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' },
-};
+  image: [absoluteUrl(mainImage, origin), ...images.map((image) => absoluteUrl(image.image, origin))],
+  brand: { '@type': 'Brand', name: BUSINESS_NAME }, category: product.categoryName ?? undefined,
+  material: product.material ?? undefined, color: product.colour ?? undefined,
+  aggregateRating: rating,
+  review: reviews.length === 0 ? undefined : reviews.slice(0, 5).map((review) => ({
+    '@type': 'Review', reviewRating: { '@type': 'Rating', ratingValue: review.rating, bestRating: 5 },
+    author: { '@type': 'Person', name: review.name }, datePublished: review.createdAt.toISOString().slice(0, 10),
+    name: review.title ?? undefined, reviewBody: review.review,
+  })),
+  offers: {
+    '@type': 'Offer', priceCurrency: 'KES', price: (priceCents / 100).toFixed(2), url, itemCondition: 'https://schema.org/NewCondition',
+    availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    seller: { '@id': businessId(origin) }, areaServed: { '@type': 'Country', name: 'Kenya' },
+  },
+}, breadcrumbJsonLd(origin, [['Shop', '/shop'], [product.name, `/products/${product.slug}`]])];
+const pageTitle = `${product.name} Upholstery Fabric, Nairobi | ${BUSINESS_NAME}`;
+const pageDescription = metaDescription(`${formatMoney(priceCents)} per ${product.unit}. ${product.description} Delivered in Nairobi and across Kenya.`);
 const monthYear = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric', timeZone: 'Africa/Nairobi' });
-const deliveryFee = Math.round(Number(env.DELIVERY_FEE) * 100);
 const consultationHref = `/consultations?type=${encodeURIComponent('Fabric and colour selection')}#book`;
 ---
-<BaseLayout title={`${product.name} | Yucca Fabrics`} description={product.description.slice(0, 160)} image={mainImage} structuredData={structuredData}>
+<BaseLayout title={pageTitle} description={pageDescription} image={mainImage} imageAlt={`${product.name} upholstery fabric`} type="product" structuredData={structuredData}>
   <div class="mx-auto max-w-7xl px-5 py-10">
     <nav aria-label="Breadcrumb"><ol class="flex flex-wrap items-center gap-2 text-xs text-gray-600">
       <li><a class="hover:text-forest" href="/">Home</a></li><li aria-hidden="true"><Icon name="fa6-solid:chevron-right" class="text-[9px]" /></li>

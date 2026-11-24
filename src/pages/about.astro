@@ -4,6 +4,7 @@ import YuccaSprig from '~/components/YuccaSprig.astro';
 import { fabricImage } from '~/data/fabric-collection';
 import { serviceImage } from '~/data/service-details';
 import BaseLayout from '~/layouts/BaseLayout.astro';
+import { businessJsonLd, metaDescription, siteOrigin } from '~/lib/seo';
 import { DEFAULT_ADDRESS, getSettings, setting, siteNumbers, whatsappUrl } from '~/lib/settings';
 
 const settings = await getSettings(Astro.locals);
@@ -22,7 +23,7 @@ const values = [
   ['fa6-solid:palette', '#A9461E', 'text-white', 'Character', 'We make room for individuality, colour and the pieces you already love, instead of a one-size-fits-all look.'],
 ];
 ---
-<BaseLayout title="Our story | Yucca Fabrics" description={`Yucca Fabrics brings together beautiful fabrics, careful upholstery, thoughtful interior design and virtual classes in ${address}.`}>
+<BaseLayout title="About Us: Upholstery Fabric Studio in Nairobi | Yucca Fabrics" description={metaDescription(`Yucca Fabrics brings together beautiful upholstery fabrics, careful reupholstery, thoughtful interior design and virtual classes in ${address}, serving homes across Kenya.`)} structuredData={businessJsonLd(settings, siteOrigin(Astro.url))}>
   <section class="relative overflow-hidden bg-cream">
     <YuccaSprig class="pointer-events-none absolute -right-20 -top-16 hidden h-96 w-96 text-olive/10 lg:block" />
     <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-2 lg:py-24">

@@ -3,13 +3,14 @@ import Pagination from '~/components/Pagination.astro';
 import ProductCard from '~/components/ProductCard.astro';
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import { activeCategories, filterOptions, parseShopFilters, searchShop, SHOP_SORTS } from '~/lib/catalogue';
+import { breadcrumbJsonLd, siteOrigin } from '~/lib/seo';
 
 const filters = parseShopFilters(Astro.url.searchParams);
 const [categories, options, result] = await Promise.all([activeCategories(), filterOptions(), searchShop(filters)]);
 const { products, total, page, pages } = result;
 const filtered = Astro.url.search.replace(/[?&]?page=\d+/, '') !== '';
 ---
-<BaseLayout title="Shop fabrics | Yucca Fabrics" description="Shop upholstery fabrics by the metre: bouclé, linen, velvet, fur and leather, delivered across Kenya.">
+<BaseLayout title="Upholstery Fabrics by the Metre in Nairobi | Yucca Fabrics" description="Shop upholstery fabrics by the metre in Nairobi: bouclé, linen, velvet, fur and leather. Pay with M-Pesa and get delivery across Kenya." structuredData={breadcrumbJsonLd(siteOrigin(Astro.url), [['Shop', '/shop']])}>
   <section class="bg-cream px-5 py-14 text-center"><p class="eyebrow">The Yucca collection</p><h1 class="mt-3 font-serif text-5xl">Fabrics to live with</h1><p class="mx-auto mt-4 max-w-xl text-sm leading-6 text-gray-600">Touchably beautiful textiles, chosen for real homes and the everyday moments inside them.</p></section>
   <section class="mx-auto max-w-7xl px-5 py-12">
     <form class="mb-9 grid gap-3 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-ink/5 sm:grid-cols-2 lg:grid-cols-4" role="search" aria-label="Filter fabrics">

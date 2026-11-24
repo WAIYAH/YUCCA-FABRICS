@@ -11,6 +11,7 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 import { db, schema } from '~/lib/db';
 import { todayInNairobi } from '~/lib/format';
 import { formatMoneyWhole } from '~/lib/money';
+import { breadcrumbJsonLd, businessId, businessJsonLd, metaDescription, siteOrigin } from '~/lib/seo';
 import { activeServices, isConsultationService } from '~/lib/services';
 import { DEFAULT_ADDRESS, DEFAULT_PHONE, getSettings, setting, telHref, whatsappUrl } from '~/lib/settings';
 
@@ -22,6 +23,20 @@ const [services, [fabrics]] = await Promise.all([
 const requestServices = services.filter((service) => !isConsultationService(service));
 const consultationPrices = services.filter(isConsultationService).map((s) => s.startingPriceCents).filter((p): p is number => p !== null);
 const settings = await getSettings(Astro.locals);
+const origin = siteOrigin(Astro.url);
+const structuredData = [
+  businessJsonLd(settings, origin),
+  ...services.map((service) => ({
+    '@context': 'https://schema.org', '@type': 'Service', name: service.name, description: metaDescription(service.description),
+    serviceType: service.categoryName ?? undefined, provider: { '@id': businessId(origin) },
+    areaServed: [{ '@type': 'City', name: 'Nairobi' }, { '@type': 'Country', name: 'Kenya' }],
+    offers: service.startingPriceCents === null ? undefined : {
+      '@type': 'Offer', priceCurrency: 'KES',
+      priceSpecification: { '@type': 'PriceSpecification', minPrice: (service.startingPriceCents / 100).toFixed(0), priceCurrency: 'KES' },
+    },
+  })),
+  breadcrumbJsonLd(origin, [['Services', '/services']]),
+];
 const steps = [
   ['fa6-solid:camera', '#1F5B43', 'text-white', 'Share your piece', `Send a photo and a few details with the form below, or visit us in ${setting(settings, 'business_address', DEFAULT_ADDRESS)}.`],
   ['fa6-solid:swatchbook', '#E3A82B', 'text-ink', 'Choose your fabric', 'Browse the collection online or compare samples with us until one feels right.'],
@@ -30,7 +45,7 @@ const steps = [
 ];
 const fileInput = 'form-control mt-1 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-cream file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-forest';
 ---
-<BaseLayout title="Upholstery & interior services | Yucca Fabrics" description="Furniture reupholstery, cushion renewal, fabric and colour consultations and room styling from Yucca Fabrics.">
+<BaseLayout title="Upholstery & Interior Design Services in Nairobi | Yucca Fabrics" description="Furniture reupholstery, sofa and cushion renewal, fabric and colour consultations and room styling from Yucca Fabrics in Nairobi, Kenya." structuredData={structuredData}>
   <section class="relative overflow-hidden bg-cream">
     <YuccaSprig class="pointer-events-none absolute -left-20 -top-12 hidden h-80 w-80 text-olive/10 sm:block" />
     <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-5 py-16 lg:grid-cols-2 lg:py-24">
