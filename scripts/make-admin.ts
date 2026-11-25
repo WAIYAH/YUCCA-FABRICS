@@ -2,9 +2,6 @@
 // password), then run:  pnpm make-admin you@example.com          (local database)
 //                       pnpm make-admin you@example.com --remote (production database)
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
 const [email, flag] = process.argv.slice(2);
 // Strict pattern: the email is placed in SQL below, so nothing outside this character set may reach it.
@@ -15,12 +12,9 @@ if (!email || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
 const target = flag === '--remote' ? '--remote' : '--local';
 const sql = `UPDATE user SET role = 'admin', status = 'active' WHERE email = '${email.toLowerCase()}' RETURNING email, role`;
 
-// The SQL goes through a file and wrangler runs directly under Node, so no shell ever parses it.
-const dir = mkdtempSync(join(tmpdir(), 'yucca-admin-'));
-const file = join(dir, 'make-admin.sql');
-writeFileSync(file, sql);
-const run = spawnSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'd1', 'execute', 'yucca-db', target, '--json', `--file=${file}`], { encoding: 'utf8' });
-rmSync(dir, { recursive: true, force: true });
+// Wrangler runs directly under Node, so no shell ever parses the SQL. It is passed with --command, not --file:
+// a remote --file run prints upload progress before the JSON and returns only a summary, not the RETURNING rows.
+const run = spawnSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'd1', 'execute', 'yucca-db', target, '--json', `--command=${sql}`], { encoding: 'utf8' });
 
 // Wrangler can crash on exit on Windows after printing its result, so trust the JSON rather than the exit code.
 let rows: { email: string; role: string }[];
