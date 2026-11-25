@@ -44,21 +44,27 @@ const menuLink = 'flex items-center gap-3 px-4 py-2.5 transition hover:bg-cream 
     <title>{title} · Admin · Yucca Homeware</title>
     <link rel="icon" type="image/jpeg" href="/images/yucca-homeware-logo.jpeg" />
   </head>
-  <body class="bg-sand font-sans text-ink antialiased">
+  <body class="admin-shell bg-sand font-sans text-ink antialiased">
     <a href="#main" class="skip-link">Skip to content</a>
     <div class="min-h-screen lg:flex">
-      <aside class="bg-forest text-white lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:shrink-0 lg:overflow-y-auto">
-        <div class="flex items-center justify-between p-5">
-          <a href="/admin" class="flex items-center gap-3" aria-label="Admin overview"><img src="/images/yucca-homeware-logo.jpeg" alt="" class="h-12 w-12 rounded-lg bg-white object-contain p-1" /><span class="leading-tight"><span class="block font-serif font-semibold tracking-[.18em]">YUCCA</span><span class="block text-[10px] uppercase tracking-[.3em] text-wheat">Studio admin</span></span></a>
-          <button id="admin-menu-toggle" type="button" class="icon-button text-white hover:bg-white/10 lg:hidden" aria-expanded="false" aria-controls="admin-nav" aria-label="Admin menu"><Icon name="fa6-solid:bars" /></button>
-        </div>
-        <nav id="admin-nav" class="hidden gap-1 px-3 pb-5 text-sm lg:grid" aria-label="Admin">
+      <!-- Desktop sidebar. Below 1024 px the same links open in the #admin-drawer popover instead. -->
+      <aside class="hidden bg-forest text-white lg:sticky lg:top-0 lg:block lg:h-screen lg:w-64 lg:shrink-0 lg:overflow-y-auto">
+        <a href="/admin" class="flex items-center gap-3 p-5" aria-label="Admin overview"><img src="/images/yucca-homeware-logo.jpeg" alt="" class="h-12 w-12 rounded-lg bg-white object-contain p-1" /><span class="leading-tight"><span class="block font-serif font-semibold tracking-[.18em]">YUCCA</span><span class="block text-[10px] uppercase tracking-[.3em] text-wheat">Studio admin</span></span></a>
+        <nav class="grid gap-1 px-3 pb-5 text-sm" aria-label="Admin">
           {sections.map((section) => <a class:list={['admin-link', { 'is-active': isActive(section.href) }]} href={section.href} aria-current={isActive(section.href) ? 'page' : undefined}><Icon name={section.icon} class="w-4 text-wheat" />{section.label}</a>)}
         </nav>
       </aside>
+      <nav id="admin-drawer" popover class="admin-drawer lg:hidden" aria-label="Admin">
+        <div class="flex items-center justify-between py-3 pl-6 pr-3"><span class="text-[10px] font-semibold uppercase tracking-[.3em] text-wheat">Studio admin</span><button type="button" popovertarget="admin-drawer" popovertargetaction="hide" class="icon-button text-white hover:bg-white/10" aria-label="Close menu" autofocus><Icon name="fa6-solid:xmark" class="text-lg" /></button></div>
+        <div class="grid gap-1 px-3 pb-6 text-sm">
+          {sections.map((section) => <a class:list={['admin-link', { 'is-active': isActive(section.href) }]} href={section.href} aria-current={isActive(section.href) ? 'page' : undefined}><Icon name={section.icon} class="w-4 text-wheat" />{section.label}</a>)}
+        </div>
+      </nav>
       <div class="min-w-0 flex-1">
-        <header class="flex items-center justify-between gap-3 border-b border-ink/5 bg-white px-5 py-2.5 md:px-8">
-          <p class="hidden text-xs uppercase tracking-[.2em] text-gray-500 sm:block">Yucca Homeware · administration</p>
+        <header class="sticky top-0 z-40 flex items-center gap-2 border-b border-ink/5 bg-white px-2 py-2 sm:px-5 md:px-8 lg:py-2.5">
+          <button type="button" popovertarget="admin-drawer" class="icon-button lg:hidden" aria-label="Open admin menu"><Icon name="fa6-solid:bars" class="text-lg" /></button>
+          <a href="/admin" class="flex min-w-0 items-center gap-2.5 lg:hidden" aria-label="Admin overview"><img src="/images/yucca-homeware-logo.jpeg" alt="" class="h-9 w-9 shrink-0 rounded-md object-contain" /><span class="leading-tight"><span class="block font-serif text-sm font-semibold tracking-[.18em]">YUCCA</span><span class="block text-[9px] uppercase tracking-[.25em] text-sage">Studio admin</span></span></a>
+          <p class="hidden text-xs uppercase tracking-[.2em] text-gray-500 lg:block">Yucca Homeware · administration</p>
           <!-- Both panels anchor to this wrapper's right edge (the dropdowns are not positioned), so they stay on screen at 360 px. -->
           <div class="relative ml-auto flex items-center gap-1">
             <div class="dropdown" data-dropdown>
@@ -89,8 +95,8 @@ const menuLink = 'flex items-center gap-3 px-4 py-2.5 transition hover:bg-cream 
             </div>
           </div>
         </header>
-        <main id="main" tabindex="-1" class="mx-auto max-w-7xl p-5 md:p-8">
-          <div class="mb-6"><h1 class="font-serif text-3xl sm:text-4xl">{heading}</h1>{intro && <p class="mt-2 max-w-2xl text-sm text-gray-600">{intro}</p>}</div>
+        <main id="main" tabindex="-1" class="mx-auto max-w-7xl px-4 py-5 sm:p-6 md:p-8">
+          <div class="mb-5 sm:mb-6"><h1 class="font-serif text-[1.75rem] leading-tight sm:text-4xl">{heading}</h1>{intro && <p class="mt-2 max-w-2xl text-sm text-gray-600">{intro}</p>}</div>
           {flash && <FormAlert message={flash.message} type={flash.type} class="mb-6" />}
           <slot />
         </main>
@@ -98,13 +104,12 @@ const menuLink = 'flex items-center gap-3 px-4 py-2.5 transition hover:bg-cream 
     </div>
     <script>
       import '~/scripts/site';
-      const toggle = document.getElementById('admin-menu-toggle');
-      const nav = document.getElementById('admin-nav');
-      toggle?.addEventListener('click', () => {
-        const open = nav?.classList.toggle('hidden') === false;
-        nav?.classList.toggle('grid', open);
-        toggle.setAttribute('aria-expanded', String(open));
-      });
+      const wide = window.matchMedia('(min-width: 1024px)');
+      // The drawer is hidden from 1024 px, so close it if the window grows past that while it is open.
+      const drawer = document.getElementById('admin-drawer');
+      wide.addEventListener('change', (event) => { if (event.matches && drawer?.matches(':popover-open')) drawer.hidePopover(); });
+      // Add/edit forms (AdminFormPanel) start collapsed for phones; wide screens have room to show them open.
+      if (wide.matches) document.querySelectorAll<HTMLDetailsElement>('details[data-desktop-open]').forEach((panel) => { panel.open = true; });
     </script>
   </body>
 </html>

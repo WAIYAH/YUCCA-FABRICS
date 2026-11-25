@@ -52,9 +52,9 @@ const images = rows.length ? await db.select().from(schema.consultationImages).w
     {CONSULTATION_STATUSES.map((s) => <a href={`?status=${s}`} class:list={['rounded-full px-4 py-2 text-xs font-semibold', statusFilter === s ? 'bg-forest text-white' : 'bg-white ring-1 ring-ink/10']}>{statusLabel(s)}</a>)}
   </nav>
   <div class="grid gap-4">
-    {rows.length === 0 && <p class="rounded-3xl bg-white p-6 text-sm text-gray-600">No consultations here.</p>}
+    {rows.length === 0 && <p class="admin-card text-sm text-gray-600">No consultations here.</p>}
     {rows.map((item) => (
-      <article class="grid gap-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 lg:grid-cols-[1fr_320px]">
+      <article class="grid gap-5 admin-card lg:grid-cols-[1fr_320px]">
         <div class="text-sm">
           <div class="flex flex-wrap items-center gap-3"><h2 class="font-serif text-xl">{formatIsoDate(item.preferredDate)} · {formatClock(item.preferredTime)}</h2><StatusBadge status={item.status} /></div>
           <p class="mt-1 text-gray-600">{item.consultationType} · {item.propertyType} · {statusLabel(item.method)}{item.budget && ` · ${item.budget}`}</p>

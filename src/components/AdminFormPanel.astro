@@ -1,0 +1,15 @@
+---
+// A collapsible card for an admin "add or edit" form. It starts closed on phones so the list below it is in
+// reach, and AdminLayout opens it on wide screens; pass `open` while editing so it is always open then.
+import Icon from '~/components/Icon.astro';
+
+interface Props { title: string; open?: boolean; id?: string; class?: string }
+const { title, open = false, id, class: className } = Astro.props;
+---
+<details id={id} class:list={['admin-card group h-fit', className]} open={open} data-desktop-open>
+  <summary class="-m-2 flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl p-2 [&::-webkit-details-marker]:hidden">
+    <h2 class="font-serif text-xl sm:text-2xl">{title}</h2>
+    <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-cream text-forest" aria-hidden="true"><Icon name="fa6-solid:chevron-down" class="transition-transform group-open:rotate-180" /></span>
+  </summary>
+  <div class="mt-5"><slot /></div>
+</details>

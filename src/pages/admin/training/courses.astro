@@ -3,6 +3,7 @@ import { asc, eq } from 'drizzle-orm';
 import Icon from '~/components/Icon.astro';
 import { LEVEL_LABELS, tracks, type TrainingTrack } from '~/data/courses';
 import { TRAINING_TRACKS } from '~/db/schema';
+import AdminFormPanel from '~/components/AdminFormPanel.astro';
 import AdminLayout from '~/layouts/AdminLayout.astro';
 import { cents, checked, done, int, text } from '~/lib/admin-form';
 import { constraintFailed, db, schema } from '~/lib/db';
@@ -42,10 +43,9 @@ const editId = Number(Astro.url.searchParams.get('edit'));
 const edit = courses.find((course) => course.id === editId) ?? null;
 ---
 <AdminLayout title="Courses & rates" heading="Courses & rates" intro="Edit titles, hourly rates and course copy. Changes show on the website immediately; existing bookings keep the rate they were booked at.">
-  <a href="/admin/training" class="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-forest"><Icon name="fa6-solid:arrow-left" class="text-xs" />Class bookings</a>
-  <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
-    <h2 class="font-serif text-2xl">{edit ? `Edit: ${edit.title}` : 'Add a course'}</h2>
-    <form method="post" class="mt-5 grid gap-4 sm:grid-cols-2">
+  <a href="/admin/training" class="mb-3 inline-flex items-center gap-2 py-2 text-sm font-semibold text-forest"><Icon name="fa6-solid:arrow-left" class="text-xs" />Class bookings</a>
+  <AdminFormPanel title={edit ? `Edit: ${edit.title}` : 'Add a course'} open={Boolean(edit)}>
+    <form method="post" class="grid gap-4 sm:grid-cols-2">
       {edit && <input type="hidden" name="id" value={edit.id} />}
       <label class="text-sm sm:col-span-2">Title<input class="form-control mt-1" name="title" required maxlength="200" value={edit?.title ?? ''} /></label>
       <label class="text-sm">Hourly rate (KES)<input class="form-control mt-1" name="hourly_rate" inputmode="decimal" required value={centsToInput(edit?.hourlyRateCents)} /></label>
@@ -58,11 +58,11 @@ const edit = courses.find((course) => course.id === editId) ?? null;
       <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" class="h-4 w-4 accent-forest" checked={edit ? edit.isActive : true} />Show on the website</label>
       <div class="flex gap-4 sm:col-span-2"><button class="btn-primary">{edit ? 'Save changes' : 'Add course'}</button>{edit && <a class="self-center text-sm underline" href="/admin/training/courses">Cancel</a>}</div>
     </form>
-  </section>
-  <section class="mt-6 overflow-x-auto rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
-    <table class="w-full min-w-[640px] text-left text-sm">
-      <thead class="text-xs uppercase tracking-wider text-gray-500"><tr><th class="py-2">Course</th><th>Track</th><th>Level</th><th>Rate</th><th>Status</th><th></th></tr></thead>
-      <tbody>{courses.map((course) => <tr class="border-t border-ink/5"><td class="py-3 font-semibold">{course.title}</td><td>{tracks[course.track].label}</td><td>{LEVEL_LABELS[course.level]}</td><td>{formatMoneyWhole(course.hourlyRateCents)}/h</td><td>{course.isActive ? 'Shown' : 'Hidden'}</td><td class="text-right"><a class="underline" href={`?edit=${course.id}`}>Edit</a></td></tr>)}</tbody>
+  </AdminFormPanel>
+  <section class="mt-6 overflow-x-auto admin-card">
+    <table class="admin-table w-full text-left text-sm">
+      <thead class="text-xs uppercase tracking-wider text-gray-500"><tr><th class="py-2">Course</th><th>Track</th><th>Level</th><th>Rate</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead>
+      <tbody>{courses.map((course) => <tr class="border-t border-ink/5"><td class="py-3 pr-4 font-semibold">{course.title}</td><td class="pr-4" data-label="Track">{tracks[course.track].label}</td><td class="pr-4" data-label="Level">{LEVEL_LABELS[course.level]}</td><td class="pr-4" data-label="Rate">{formatMoneyWhole(course.hourlyRateCents)}/h</td><td class="pr-4" data-label="Status">{course.isActive ? 'Shown' : 'Hidden'}</td><td class="admin-actions text-right"><a class="underline" href={`?edit=${course.id}`}>Edit</a></td></tr>)}</tbody>
     </table>
   </section>
 </AdminLayout>

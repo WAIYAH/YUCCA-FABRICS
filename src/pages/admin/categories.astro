@@ -1,5 +1,6 @@
 ---
 import { and, asc, count, eq } from 'drizzle-orm';
+import AdminFormPanel from '~/components/AdminFormPanel.astro';
 import AdminLayout from '~/layouts/AdminLayout.astro';
 import { checked, done, int, optionalText, text } from '~/lib/admin-form';
 import { constraintFailed, db, schema } from '~/lib/db';
@@ -48,20 +49,21 @@ const edit = categories.find(({ category }) => category.id === Number(Astro.url.
 ---
 <AdminLayout title="Categories" heading="Shop categories" intro="Categories appear as tiles on the homepage and as a shop filter.">
   <div class="grid gap-6 xl:grid-cols-[.8fr_1.2fr]">
-    <form method="post" enctype="multipart/form-data" class="grid h-fit gap-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
-      <h2 class="font-serif text-2xl">{edit ? `Edit: ${edit.name}` : 'Add a category'}</h2>
-      {edit && <input type="hidden" name="id" value={edit.id} />}
-      <label class="text-sm">Name<input class="form-control mt-1" name="name" required maxlength="120" value={edit?.name ?? ''} /></label>
-      <label class="text-sm">Description<textarea class="form-control mt-1" name="description" rows="2" maxlength="1000">{edit?.description ?? ''}</textarea></label>
-      <label class="text-sm">Display order<input class="form-control mt-1" name="sort_order" type="number" value={edit?.sortOrder ?? categories.length + 1} /><span class="mt-1 block text-xs text-gray-500">Lower numbers come first on the homepage and in the shop filter.</span></label>
-      <label class="text-sm">Tile photo (optional)<input class="form-control mt-1 text-sm" name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
-      <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" class="h-4 w-4 accent-forest" checked={edit?.isActive ?? true} />Show on the website</label>
-      <div class="flex gap-4"><button class="btn-primary">{edit ? 'Save' : 'Add category'}</button>{edit && <a class="self-center text-sm underline" href="/admin/categories">Cancel</a>}</div>
-    </form>
-    <section class="overflow-x-auto rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
-      <table class="w-full min-w-[480px] text-left text-sm">
+    <AdminFormPanel title={edit ? `Edit: ${edit.name}` : 'Add a category'} open={Boolean(edit)}>
+      <form method="post" enctype="multipart/form-data" class="grid gap-4">
+        {edit && <input type="hidden" name="id" value={edit.id} />}
+        <label class="text-sm">Name<input class="form-control mt-1" name="name" required maxlength="120" value={edit?.name ?? ''} /></label>
+        <label class="text-sm">Description<textarea class="form-control mt-1" name="description" rows="2" maxlength="1000">{edit?.description ?? ''}</textarea></label>
+        <label class="text-sm">Display order<input class="form-control mt-1" name="sort_order" type="number" value={edit?.sortOrder ?? categories.length + 1} /><span class="mt-1 block text-xs text-gray-500">Lower numbers come first on the homepage and in the shop filter.</span></label>
+        <label class="text-sm">Tile photo (optional)<input class="form-control mt-1 text-sm" name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" class="h-4 w-4 accent-forest" checked={edit?.isActive ?? true} />Show on the website</label>
+        <div class="flex gap-4"><button class="btn-primary">{edit ? 'Save' : 'Add category'}</button>{edit && <a class="self-center text-sm underline" href="/admin/categories">Cancel</a>}</div>
+      </form>
+    </AdminFormPanel>
+    <section class="overflow-x-auto admin-card">
+      <table class="admin-table w-full text-left text-sm">
         <thead class="text-xs uppercase tracking-wider text-gray-500"><tr><th class="py-2">Order</th><th>Category</th><th>Products</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
-        <tbody>{categories.map(({ category, products }) => <tr class="border-t border-ink/5"><td class="py-3 text-gray-500">{category.sortOrder}</td><td class="py-3"><strong>{category.name}</strong>{category.description && <><br /><span class="text-xs text-gray-500">{category.description}</span></>}</td><td>{products}</td><td>{category.isActive ? 'Shown' : 'Hidden'}</td><td class="py-3"><span class="flex justify-end gap-3"><a class="underline" href={`?edit=${category.id}`}>Edit</a><form method="post" data-confirm={`Delete ${category.name}?`}><input type="hidden" name="intent" value="delete" /><input type="hidden" name="id" value={category.id} /><button class="text-[#7A2E22] underline">Delete</button></form></span></td></tr>)}</tbody>
+        <tbody>{categories.map(({ category, products }) => <tr class="border-t border-ink/5"><td class="py-3 pr-4 text-gray-500" data-label="Display order">{category.sortOrder}</td><td class="py-3 pr-4 max-lg:order-first"><strong>{category.name}</strong>{category.description && <><br /><span class="text-xs text-gray-500">{category.description}</span></>}</td><td class="pr-4" data-label="Products">{products}</td><td class="pr-4" data-label="Status">{category.isActive ? 'Shown' : 'Hidden'}</td><td class="admin-actions py-3"><span class="flex justify-end gap-4"><a class="underline" href={`?edit=${category.id}`}>Edit</a><form method="post" data-confirm={`Delete ${category.name}?`}><input type="hidden" name="intent" value="delete" /><input type="hidden" name="id" value={category.id} /><button class="text-[#7A2E22] underline">Delete</button></form></span></td></tr>)}</tbody>
       </table>
     </section>
   </div>

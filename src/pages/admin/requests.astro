@@ -53,9 +53,9 @@ const [images, quotes] = ids.length
 ---
 <AdminLayout title="Service requests" heading="Service requests" intro="Upholstery and project enquiries. Add a reply or a quote; the customer is emailed and sees it in their account.">
   <div class="grid gap-4">
-    {rows.length === 0 && <p class="rounded-3xl bg-white p-6 text-sm text-gray-600">No requests yet.</p>}
+    {rows.length === 0 && <p class="admin-card text-sm text-gray-600">No requests yet.</p>}
     {rows.map(({ request, service }) => (
-      <article class="grid gap-5 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 lg:grid-cols-[1fr_360px]">
+      <article class="grid gap-5 admin-card lg:grid-cols-[1fr_360px]">
         <div class="text-sm">
           <div class="flex flex-wrap items-center gap-3"><h2 class="font-serif text-xl">{service ?? 'Project enquiry'}</h2><StatusBadge status={request.status} /></div>
           <p class="mt-2"><strong>{request.name}</strong> · <a class="underline" href={`mailto:${request.email}`}>{request.email}</a> · <a class="underline" href={`tel:${request.phone}`}>{request.phone}</a></p>
@@ -69,7 +69,7 @@ const [images, quotes] = ids.length
           <input type="hidden" name="id" value={request.id} />
           <label class="text-sm">Status<select class="form-control mt-1" name="status">{REQUEST_STATUSES.map((s) => <option value={s} selected={request.status === s}>{statusLabel(s)}</option>)}</select></label>
           <label class="text-sm">Reply to the customer<textarea class="form-control mt-1" name="admin_response" rows="3" maxlength="5000">{request.adminResponse ?? ''}</textarea></label>
-          <details class="rounded-xl bg-white p-3"><summary class="cursor-pointer text-sm font-semibold">Add a quote</summary>
+          <details class="rounded-xl bg-white p-3"><summary class="cursor-pointer py-1 text-sm font-semibold">Add a quote</summary>
             <label class="mt-3 block text-sm">Amount (KES)<input class="form-control mt-1" name="quote_amount" inputmode="decimal" /></label>
             <label class="mt-3 block text-sm">What’s included<textarea class="form-control mt-1" name="quote_details" rows="3" maxlength="5000"></textarea></label>
           </details>

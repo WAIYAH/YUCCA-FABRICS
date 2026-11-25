@@ -24,7 +24,7 @@ const [messages, [subscribers]] = await db.batch([
 <AdminLayout title="Messages" heading="Messages" intro="Contact form messages and group training enquiries. Reply by email, then mark them as replied.">
   <p class="mb-5 flex flex-wrap items-center gap-3 rounded-3xl bg-white p-4 text-sm shadow-sm ring-1 ring-ink/5">Newsletter subscribers: <strong>{subscribers?.n ?? 0}</strong><a class="btn-secondary py-2" href="/admin/export/newsletter.csv">Download CSV</a></p>
   <div class="grid gap-3">
-    {messages.length === 0 && <p class="rounded-3xl bg-white p-6 text-sm text-gray-600">No messages yet.</p>}
+    {messages.length === 0 && <p class="admin-card text-sm text-gray-600">No messages yet.</p>}
     {messages.map((message) => (
       <details class="rounded-3xl bg-white shadow-sm ring-1 ring-ink/5" open={message.status === 'new'}>
         <summary class="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 p-5"><span><strong>{message.subject}</strong><br /><span class="text-xs text-gray-500">{message.name} · {formatDateTime(message.createdAt)}</span></span><StatusBadge status={message.status} /></summary>

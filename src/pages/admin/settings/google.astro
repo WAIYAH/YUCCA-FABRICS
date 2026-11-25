@@ -22,11 +22,11 @@ if (Astro.request.method === 'POST') {
 const connection = configured ? await googleConnection() : { connected: false, since: null };
 ---
 <AdminLayout title="Google Meet" heading="Google Meet & Calendar" intro="When connected, paid Google Meet classes automatically get a calendar event with a Meet link, and Google emails the invitation to the customer.">
-  <a href="/admin/settings" class="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-forest"><Icon name="fa6-solid:arrow-left" class="text-xs" />Settings</a>
-  <section class="max-w-3xl rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5 sm:p-8">
+  <a href="/admin/settings" class="mb-3 inline-flex items-center gap-2 py-2 text-sm font-semibold text-forest"><Icon name="fa6-solid:arrow-left" class="text-xs" />Settings</a>
+  <section class="max-w-3xl admin-card sm:p-8">
     {!configured ? (
       <>
-        <h2 class="font-serif text-2xl">Not set up yet</h2>
+        <h2 class="font-serif text-xl sm:text-2xl">Not set up yet</h2>
         <p class="mt-3 text-sm leading-6 text-gray-600">A developer needs to create a Google Cloud OAuth client once and add its secrets to the Worker:</p>
         <ol class="mt-4 grid list-decimal gap-2 pl-5 text-sm leading-6 text-gray-700">
           <li>In Google Cloud Console, enable the <strong>Google Calendar API</strong> and create an <strong>OAuth client ID</strong> (type: Web application).</li>
@@ -43,7 +43,7 @@ const connection = configured ? await googleConnection() : { connected: false, s
       </>
     ) : (
       <>
-        <h2 class="font-serif text-2xl">Connect the business Google account</h2>
+        <h2 class="font-serif text-xl sm:text-2xl">Connect the business Google account</h2>
         <p class="mt-3 text-sm leading-6 text-gray-600">Sign in with the Google account whose calendar should hold class bookings. The site only asks to manage calendar events.</p>
         <form method="post" class="mt-6"><input type="hidden" name="intent" value="connect" /><button class="btn-primary"><Icon name="fa6-brands:google" />Connect Google account</button></form>
       </>

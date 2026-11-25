@@ -44,18 +44,18 @@ const [weekly, blackouts] = await db.batch([
 const byDay = new Map(weekly.map((row) => [row.weekday, row]));
 ---
 <AdminLayout title="Opening hours" heading="Class opening hours" intro={`When customers can book virtual classes (Nairobi time). Sessions start on the hour, at least ${TRAINING_RULES.leadHours} hours ahead and up to ${TRAINING_RULES.horizonDays} days ahead.`}>
-  <a href="/admin/training" class="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-forest"><Icon name="fa6-solid:arrow-left" class="text-xs" />Class bookings</a>
+  <a href="/admin/training" class="mb-3 inline-flex items-center gap-2 py-2 text-sm font-semibold text-forest"><Icon name="fa6-solid:arrow-left" class="text-xs" />Class bookings</a>
   <div class="grid gap-6 xl:grid-cols-[1.2fr_.8fr]">
-    <form method="post" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
+    <form method="post" class="admin-card">
       <input type="hidden" name="intent" value="hours" />
-      <h2 class="font-serif text-2xl">Weekly hours</h2>
+      <h2 class="font-serif text-xl sm:text-2xl">Weekly hours</h2>
       <div class="mt-4 grid gap-3">
         {DAYS.map((name, day) => {
           const row = byDay.get(day);
           return (
-            <fieldset class="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-2xl bg-sand p-3 sm:grid-cols-[10rem_auto_auto]">
+            <fieldset class="grid grid-cols-2 items-center gap-x-3 gap-y-1 rounded-2xl bg-sand p-3 sm:grid-cols-[10rem_1fr_1fr] sm:gap-y-3">
               <legend class="sr-only">{name}</legend>
-              <label class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name={`open_${day}`} class="h-4 w-4 accent-forest" checked={Boolean(row)} />{name}</label>
+              <label class="col-span-2 flex items-center gap-2 text-sm font-semibold sm:col-span-1"><input type="checkbox" name={`open_${day}`} class="h-4 w-4 accent-forest" checked={Boolean(row)} />{name}</label>
               <label class="text-xs">From<select class="form-control mt-1 py-2" name={`start_${day}`}>{HOURS.map((h) => <option selected={(row?.startTime ?? '09:00') === h}>{h}</option>)}</select></label>
               <label class="text-xs">To<select class="form-control mt-1 py-2" name={`end_${day}`}>{HOURS.map((h) => <option selected={(row?.endTime ?? '17:00') === h}>{h}</option>)}</select></label>
             </fieldset>
@@ -64,8 +64,8 @@ const byDay = new Map(weekly.map((row) => [row.weekday, row]));
       </div>
       <button class="btn-primary mt-5">Save hours</button>
     </form>
-    <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-ink/5">
-      <h2 class="font-serif text-2xl">Closed days</h2>
+    <section class="admin-card">
+      <h2 class="font-serif text-xl sm:text-2xl">Closed days</h2>
       <p class="mt-1 text-xs text-gray-500">Holidays or days away. Existing bookings on these days are not cancelled.</p>
       <form method="post" class="mt-4 grid gap-3"><input type="hidden" name="intent" value="blackout" />
         <label class="text-sm">Date<input class="form-control mt-1" type="date" name="date" min={todayInNairobi()} required /></label>

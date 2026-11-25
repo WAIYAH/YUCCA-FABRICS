@@ -163,9 +163,47 @@
   .toast.is-error { background: #8f4038; }
   .admin-link { display: flex; align-items: center; gap: .75rem; border-radius: .375rem; padding: .7rem .8rem; color: rgba(255, 255, 255, .86); transition: background .2s; }
   .admin-link:hover, .admin-link.is-active { background: rgba(255, 255, 255, .12); color: #fff; }
+  .admin-card {
+    border-radius: 1.5rem; background: #fff; padding: 1rem;
+    box-shadow: 0 0 0 1px rgba(42, 43, 37, .05), 0 1px 3px rgba(0, 0, 0, .1), 0 1px 2px -1px rgba(0, 0, 0, .1);
+  }
+  @media (min-width: 640px) { .admin-card { padding: 1.5rem; } }
+
+  /* Admin menu on phones and tablets: a popover drawer, so it opens, closes and light-dismisses without JS. */
+  .admin-drawer {
+    inset: 0 auto 0 0; margin: 0; height: 100dvh; max-height: none; width: min(20rem, 86vw); overflow-y: auto;
+    border: 0; padding: 0; background: var(--color-forest); color: #fff;
+    transform: translateX(-100%); transition: transform .25s ease, overlay .25s allow-discrete, display .25s allow-discrete;
+  }
+  .admin-drawer:popover-open { transform: none; }
+  @starting-style { .admin-drawer:popover-open { transform: translateX(-100%); } }
+  .admin-drawer::backdrop { background: rgba(37, 46, 22, .45); }
+  .admin-table th:not(:last-child) { padding-right: .75rem; }
   .eyebrow { font-size: .68rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--color-sage); }
   .bg-forest .eyebrow, .bg-night .eyebrow { color: var(--color-wheat); }
+
+  /* Phones zoom into any focused field under 16 px, so fields are 16 px on small and touch screens (admin and public). */
+  @media (max-width: 639.98px), (pointer: coarse) { .form-control { font-size: 1rem; } }
 }
+
+/* Admin tables turn into one card per row below 1024 px: each cell shows its column name (data-label) above
+   its value; cells without a label (the row's title and its actions) span the full width.
+   Unlayered on purpose, so it overrides the cells' desktop padding and min-width utilities. */
+@media (max-width: 1023.98px) {
+  .admin-table, .admin-table tbody { display: block; min-width: 0; }
+  .admin-table thead { position: absolute; height: 1px; width: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .admin-table tr { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .75rem 1rem; padding: 1rem 0; }
+  .admin-table tbody tr:first-child { border-top: 0; padding-top: .25rem; }
+  .admin-table td { display: block; min-width: 0; padding: 0; text-align: left; overflow-wrap: anywhere; }
+  .admin-table td:not([data-label]) { grid-column: 1 / -1; }
+  .admin-table td[data-label]::before { display: block; margin-bottom: .15rem; color: var(--color-gray-500); content: attr(data-label); font-size: .68rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+  .admin-table td.admin-actions > * { justify-content: flex-start; }
+}
+
+/* Comfortable touch targets in the admin: row actions and checkbox labels reach 44 px. */
+.admin-actions a, .admin-actions button { display: inline-flex; min-height: 2.75rem; align-items: center; }
+.admin-shell label:has(> input[type='checkbox']) { min-height: 2.75rem; }
+.admin-shell input[type='checkbox'] { height: 1.15rem; width: 1.15rem; }
 
 /* Sections ease in as they scroll into view. The script adds .reveal-ready, so content stays visible without JS. */
 @media (prefers-reduced-motion: no-preference) {
